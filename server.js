@@ -1,7 +1,14 @@
 var express = require('express');
 var passport = require('passport');
-var Strategy = require('passport-local').Strategy;
+var session = require('express-session');
+var LocalStrategy = require('passport-local').Strategy;
+var TotpStrategy = require('passport-totp').Strategy;
+var base32 = require('thirty-two');
+var sprintf = require('sprintf');
+var crypto = require('crypto');
+
 var db = require('./db');
+var strings = require('./views/strings.json');
 
 
 // Configure the local strategy for use by Passport.
@@ -10,7 +17,7 @@ var db = require('./db');
 // (`username` and `password`) submitted by the user.  The function must verify
 // that the password is correct and then invoke `cb` with a user object, which
 // will be set at `req.user` in route handlers after authentication.
-passport.use(new Strategy(
+passport.use(new LocalStrategy(
   function(username, password, cb) {
     db.users.findByUsername(username, function(err, user) {
       if (err) { return cb(err); }
@@ -20,6 +27,15 @@ passport.use(new Strategy(
     });
   }));
 
+passport.use(new TotpStrategy(function(user,done){
+  var key = user.key;
+  if (!key){
+    return done(new Error('No Key'))
+  } else {
+    return done(null, base32.decode(key),30);
+  }
+})
+);
 
 // Configure Passport authenticated session persistence.
 //
@@ -60,22 +76,90 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: false, save
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Define routes.
-app.get('/',
-  function(req, res) {
-    res.render('home', { user: req.user });
-  });
+function isLoggedIn(req, res, next) {
+    if(req.isAuthenticated()) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
 
-app.get('/login',
-  function(req, res){
-    res.render('login');
+function ensureTotp(req, res, next) {
+    if(req.user.key && req.session.method == 'totp'||!req.user.key && req.session.method == 'plain') {
+      next();
+    } else {
+      res.redirect('/login');
+    }
+}
+
+// Define routes.
+app.get('/', isLoggedIn, ensureTotp, function(req, res) {
+    res.redirect('/profile');
+});
+
+app.get('/totp-input', isLoggedIn, function(req, res) {
+    if(!req.user.key) {
+        console.log("Logic error, totp-input requested with no key set");
+        res.redirect('/login');
+    }
+    
+    res.render('totp-input', {
+        strings: strings
+    });
+});
+
+app.post('/totp-input', isLoggedIn, passport.authenticate('totp', {
+    failureRedirect: '/login',
+    successRedirect: '/profile'
+}));
+
+
+app.get('/totp-setup',isLoggedIn,ensureTotp,function(req,res){
+  var url= null;
+  if (req.user.key){
+    var qrData = sprintf('otpauth://totp/%s?secret=%s', "AusVote["+req.user.displayName+"]", req.user.key);
+    url = "https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=" + qrData;
+  }
+  res.render('totp-setup',{
+    strings: strings,
+    user: req.user,
+    qrUrl: url
   });
+}
+);
+
+app.post('/totp-setup', isLoggedIn, ensureTotp, function(req, res) {
+  if(req.body.totp) {
+    req.session.method = 'totp';
+    console.log("TOTP SETUP");
+    var secret = base32.encode(crypto.randomBytes(16));
+    secret = secret.toString().replace(/=/g, '');
+    req.user.key = secret;
+  } else {
+    req.session.method = 'plain';
+    req.user.key = null;
+  }
+  res.redirect('/totp-setup');
+}
+);
+
+app.get('/login', function(req, res) {
+    req.logout();
+    res.render('login', {
+        strings: strings
+    });
+});
   
-app.post('/login', 
-  passport.authenticate('local', { failureRedirect: '/login' }),
-  function(req, res) {
-    res.redirect('/');
-  });
+app.post('/login', passport.authenticate('local', {failureRedirect: '/login' }), function(req, res) {
+  if (req.user.key){
+    req.session.method= 'totp';
+    res.redirect('/totp-input');
+  } else {
+    req.session.method = 'plain';
+    res.redirect('/profile');
+  }
+}
+);
   
 app.get('/logout',
   function(req, res){
@@ -84,7 +168,7 @@ app.get('/logout',
   });
 
 app.get('/profile',
-  require('connect-ensure-login').ensureLoggedIn(),
+  isLoggedIn,ensureTotp,
   function(req, res){
     res.render('profile', { user: req.user });
   });
