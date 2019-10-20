@@ -6,9 +6,24 @@ var TotpStrategy = require('passport-totp').Strategy;
 var base32 = require('thirty-two');
 var sprintf = require('sprintf');
 var crypto = require('crypto');
+var mongoose = require('mongoose');
 
-var db = require('./db');
 var strings = require('./views/strings.json');
+
+var User = require('./models/users')
+
+
+//Set up default mongoose connection
+//Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
+var mongoDB = 'mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
+
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
 
 
 // Configure the local strategy for use by Passport.
@@ -102,7 +117,7 @@ app.get('/totp-input', isLoggedIn, function(req, res) {
         console.log("Logic error, totp-input requested with no key set");
         res.redirect('/login');
     }
-    
+
     res.render('totp-input', {
         strings: strings
     });
@@ -149,7 +164,7 @@ app.get('/login', function(req, res) {
         strings: strings
     });
 });
-  
+
 app.post('/login', passport.authenticate('local', {failureRedirect: '/login' }), function(req, res) {
   if (req.user.key){
     req.session.method= 'totp';
@@ -160,7 +175,7 @@ app.post('/login', passport.authenticate('local', {failureRedirect: '/login' }),
   }
 }
 );
-  
+
 app.get('/logout',
   function(req, res){
     req.logout();
