@@ -10,7 +10,7 @@ var mongoose = require('mongoose');
 
 var strings = require('./views/strings.json');
 
-var User = require('./models/users')
+var User = require('./models/users');
 
 
 //Set up default mongoose connection
@@ -34,7 +34,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new LocalStrategy(
   function(username, password, cb) {
-    db.users.findByUsername(username, function(err, user) {
+    Users.find({ username: username }, function(err, user) {
       if (err) { return cb(err); }
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
@@ -63,8 +63,9 @@ passport.serializeUser(function(user, cb) {
   cb(null, user.id);
 });
 
+// Note id is the default _id field in mongoDB
 passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function (err, user) {
+  User.findById(id, function (err, user) {
     if (err) { return cb(err); }
     cb(null, user);
   });
