@@ -1,40 +1,50 @@
-var express = require('express');
-var passport = require('passport');
-var session = require('express-session');
-var LocalStrategy = require('passport-local').Strategy;
-var TotpStrategy = require('passport-totp').Strategy;
-var base32 = require('thirty-two');
-var sprintf = require('sprintf');
-var crypto = require('crypto');
+var express = require("express");
+var passport = require("passport");
+var session = require("express-session");
+var LocalStrategy = require("passport-local").Strategy;
+var TotpStrategy = require("passport-totp").Strategy;
+var base32 = require("thirty-two");
+var sprintf = require("sprintf");
+var crypto = require("crypto");
 
-var db = require('./db');
-var strings = require('./views/strings.json');
+var db = require("./db");
+var strings = require("./views/strings.json");
 
-
+// import {ROLES, PERMISSIONS} from "~/rbac";
+var PERMISSIONS = require("./rbac/permissions");
+var eventTemplate = require("./auditing/event");
 // Configure the local strategy for use by Passport.
 //
 // The local strategy require a `verify` function which receives the credentials
 // (`username` and `password`) submitted by the user.  The function must verify
 // that the password is correct and then invoke `cb` with a user object, which
 // will be set at `req.user` in route handlers after authentication.
-passport.use(new LocalStrategy(
-  function(username, password, cb) {
+passport.use(
+  new LocalStrategy(function(username, password, cb) {
     db.users.findByUsername(username, function(err, user) {
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (user.password != password) { return cb(null, false); }
+      if (err) {
+        return cb(err);
+      }
+      if (!user) {
+        return cb(null, false);
+      }
+      if (user.password != password) {
+        return cb(null, false);
+      }
       return cb(null, user);
     });
-  }));
+  })
+);
 
-passport.use(new TotpStrategy(function(user,done){
-  var key = user.key;
-  if (!key){
-    return done(new Error('No Key'))
-  } else {
-    return done(null, base32.decode(key),30);
-  }
-})
+passport.use(
+  new TotpStrategy(function(user, done) {
+    var key = user.key;
+    if (!key) {
+      return done(new Error("No Key"));
+    } else {
+      return done(null, base32.decode(key), 30);
+    }
+  })
 );
 
 // Configure Passport authenticated session persistence.
@@ -49,128 +59,156 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function (err, user) {
-    if (err) { return cb(err); }
+  db.users.findById(id, function(err, user) {
+    if (err) {
+      return cb(err);
+    }
     cb(null, user);
   });
 });
-
-
-
 
 // Create a new Express application.
 var app = express();
 
 // Configure view engine to render EJS templates.
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
+app.set("views", __dirname + "/views");
+app.set("view engine", "ejs");
 
 // Use application-level middleware for common functionality, including
 // logging, parsing, and session handling.
-app.use(require('morgan')('combined'));
-app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
+app.use(require("morgan")("combined"));
+app.use(require("body-parser").urlencoded({extended: true}));
+app.use(
+  require("express-session")({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: false
+  })
+);
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
 app.use(passport.initialize());
 app.use(passport.session());
 
+function authorise(req, res, role) {
+  return req.user.role === "voter";
+}
+
 function isLoggedIn(req, res, next) {
-    if(req.isAuthenticated()) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    res.redirect("/login");
+  }
 }
 
 function ensureTotp(req, res, next) {
-    if(req.user.key && req.session.method == 'totp'||!req.user.key && req.session.method == 'plain') {
-      next();
-    } else {
-      res.redirect('/login');
-    }
+  if (
+    (req.user.key && req.session.method == "totp") ||
+    (!req.user.key && req.session.method == "plain")
+  ) {
+    next();
+  } else {
+    res.redirect("/login");
+  }
 }
 
 // Define routes.
-app.get('/', isLoggedIn, ensureTotp, function(req, res) {
-    res.redirect('/profile');
+app.get("/", isLoggedIn, ensureTotp, function(req, res) {
+  res.redirect("/profile");
 });
 
-app.get('/totp-input', isLoggedIn, function(req, res) {
-    if(!req.user.key) {
-        console.log("Logic error, totp-input requested with no key set");
-        res.redirect('/login');
-    }
-    
-    res.render('totp-input', {
-        strings: strings
-    });
-});
-
-app.post('/totp-input', isLoggedIn, passport.authenticate('totp', {
-    failureRedirect: '/login',
-    successRedirect: '/profile'
-}));
-
-
-app.get('/totp-setup',isLoggedIn,ensureTotp,function(req,res){
-  var url= null;
-  if (req.user.key){
-    var qrData = sprintf('otpauth://totp/%s?secret=%s', "AusVote["+req.user.displayName+"]", req.user.key);
-    url = "https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=" + qrData;
+app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
+  if (authorise(req, res, "voter")) {
+    const event = eventTemplate(req.user, "vote");
+    res.render("vote", {user: req.user});
+  } else {
+    res.redirect("/profile");
   }
-  res.render('totp-setup',{
+});
+
+app.get("/totp-input", isLoggedIn, function(req, res) {
+  if (!req.user.key) {
+    console.log("Logic error, totp-input requested with no key set");
+    res.redirect("/login");
+  }
+
+  res.render("totp-input", {
+    strings: strings
+  });
+});
+
+app.post(
+  "/totp-input",
+  isLoggedIn,
+  passport.authenticate("totp", {
+    failureRedirect: "/login",
+    successRedirect: "/profile"
+  })
+);
+
+app.get("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
+  var url = null;
+  if (req.user.key) {
+    var qrData = sprintf(
+      "otpauth://totp/%s?secret=%s",
+      "AusVote[" + req.user.displayName + "]",
+      req.user.key
+    );
+    url =
+      "https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=" +
+      qrData;
+  }
+  res.render("totp-setup", {
     strings: strings,
     user: req.user,
     qrUrl: url
   });
-}
-);
+});
 
-app.post('/totp-setup', isLoggedIn, ensureTotp, function(req, res) {
-  if(req.body.totp) {
-    req.session.method = 'totp';
+app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
+  if (req.body.totp) {
+    req.session.method = "totp";
     console.log("TOTP SETUP");
     var secret = base32.encode(crypto.randomBytes(16));
-    secret = secret.toString().replace(/=/g, '');
+    secret = secret.toString().replace(/=/g, "");
     req.user.key = secret;
   } else {
-    req.session.method = 'plain';
+    req.session.method = "plain";
     req.user.key = null;
   }
-  res.redirect('/totp-setup');
-}
-);
-
-app.get('/login', function(req, res) {
-    req.logout();
-    res.render('login', {
-        strings: strings
-    });
+  res.redirect("/totp-setup");
 });
-  
-app.post('/login', passport.authenticate('local', {failureRedirect: '/login' }), function(req, res) {
-  if (req.user.key){
-    req.session.method= 'totp';
-    res.redirect('/totp-input');
-  } else {
-    req.session.method = 'plain';
-    res.redirect('/profile');
-  }
-}
-);
-  
-app.get('/logout',
-  function(req, res){
-    req.logout();
-    res.redirect('/');
-  });
 
-app.get('/profile',
-  isLoggedIn,ensureTotp,
-  function(req, res){
-    res.render('profile', { user: req.user });
+app.get("/login", function(req, res) {
+  req.logout();
+  res.render("login", {
+    strings: strings
   });
+});
+
+app.post(
+  "/login",
+  passport.authenticate("local", {failureRedirect: "/login"}),
+  function(req, res) {
+    if (req.user.key) {
+      req.session.method = "totp";
+      res.redirect("/totp-input");
+    } else {
+      req.session.method = "plain";
+      res.redirect("/profile");
+    }
+  }
+);
+
+app.get("/logout", function(req, res) {
+  req.logout();
+  res.redirect("/");
+});
+
+app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
+  res.render("profile", {user: req.user});
+});
 
 app.listen(3000);
