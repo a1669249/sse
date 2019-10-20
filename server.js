@@ -12,14 +12,14 @@ var User = require('./models/users');
 var strings = require('./views/strings.json');
 
 // import {ROLES, PERMISSIONS} from "~/rbac";
-var PERMISSIONS = require("./rbac/permissions");
+// var PERMISSIONS = require("./rbac/permissions");
 var eventTemplate = require("./auditing/event");
 
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
 var mongoDB = 'mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
 
 //Get the default connection
 var db = mongoose.connection;
