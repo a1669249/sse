@@ -1,6 +1,6 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema;
-var permissions = require('../rbac/permissions');
+var mongoose = require("mongoose"),
+  Schema = mongoose.Schema;
+var permissions = require("../rbac/permissions");
 var roles = Object.keys(permissions);
 
 var userSchema = new Schema({
@@ -11,4 +11,4 @@ var userSchema = new Schema({
   role: {type: [String], enum: roles, required: true}
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

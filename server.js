@@ -1,33 +1,34 @@
-var express = require('express');
-var passport = require('passport');
-var session = require('express-session');
-var LocalStrategy = require('passport-local').Strategy;
-var TotpStrategy = require('passport-totp').Strategy;
-var base32 = require('thirty-two');
-var sprintf = require('sprintf');
-var crypto = require('crypto');
-var mongoose = require('mongoose');
+var express = require("express");
+var passport = require("passport");
+var session = require("express-session");
+var LocalStrategy = require("passport-local").Strategy;
+var TotpStrategy = require("passport-totp").Strategy;
+var base32 = require("thirty-two");
+var sprintf = require("sprintf");
+var crypto = require("crypto");
+var mongoose = require("mongoose");
 
-var User = require('./models/users');
-var strings = require('./views/strings.json');
+var User = require("./models/users");
+var strings = require("./views/strings.json");
 
 // import {ROLES, PERMISSIONS} from "~/rbac";
 // var PERMISSIONS = require("./rbac/permissions");
 var eventTemplate = require("./auditing/event");
 
-
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
-var mongoDB = 'mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+var mongoDB =
+  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority";
+mongoose.connect(
+  mongoDB,
+  {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true}
+);
 
 //Get the default connection
 var db = mongoose.connection;
 
 //Bind connection to error event (to get notification of connection errors)
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 // Configure the local strategy for use by Passport.
 //
@@ -37,7 +38,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(
   new LocalStrategy(function(username, password, cb) {
-    Users.find({ username: username }, function(err, user) {
+    Users.find({username: username}, function(err, user) {
       if (err) {
         return cb(err);
       }
@@ -109,7 +110,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 function authorise(req, res, role) {
-  return req.user.role === "voter";
+  return req.user.role === role;
 }
 
 function isLoggedIn(req, res, next) {
