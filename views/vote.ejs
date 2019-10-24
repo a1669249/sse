@@ -1,8 +1,37 @@
-<p>
-ID: <%= user.id %><br/>
-Username: <%= user.username %><br/>
-Name: <%= user.displayName %><br/>
-</p>
-<br>
-<h1>Vote</h1>
-<a href="/logout">Log out</a>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SSE Voting System</title>
+		<!-- Style Sheets -->
+		<link rel='stylesheet' href='/stylesheets/style.css'>
+		<link rel='stylesheet' href='/libraries/bootstrap/css/bootstrap.min.css'>
+		<!-- Libraries -->
+		<script src='/libraries/jquery.min.js'/>
+		<script src='/libraries/bootstrap/js/bootstrap.bundle.js'/>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div id="header" class="row">
+				<div class="col">
+					<img src="/images/aec-logo-homepage.png">
+				</div>
+				<div class="col">
+					<a href="/logout">Log out</a>
+				</div>
+			</div>
+			<div id="content" class="row">
+				<p>
+					ID: <%= user.id %><br>
+					Username: <%= user.username %><br>
+					Name: <%= user.displayName %><br>
+				</p>
+				<br>
+				<h1>Vote</h1>
+			</div>
+			<div id="footer" class="row">
+			</div>
+		</div>
+		
+		
+	</body>
+</html>
