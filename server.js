@@ -18,7 +18,7 @@ var saveEvent = require("./auditing/saveEvent");
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
 var mongoDB =
-  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority";
+  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
 mongoose.connect(
   mongoDB,
   {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true}
