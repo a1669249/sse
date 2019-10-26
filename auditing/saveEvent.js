@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-var Event = require("./models/events");
+var Event = require("../models/events");
 
 var mongoDB =
   "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
@@ -12,8 +12,12 @@ var db = mongoose.connection;
 
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
-function createEvent(details) {
-  let event = new Event(details);
+function saveEvent({user, action}) {
+  let event = new Event({
+    timestamp: new Date(),
+    action,
+    user: user.role === "voter" ? user.role : `${user.username} (${user.role})`
+  });
   event.save(function(err) {
     if (err) {
       reject(err);
@@ -25,4 +29,4 @@ function createEvent(details) {
   });
 }
 
-export default createEvent;
+module.exports = saveEvent;

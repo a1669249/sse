@@ -8,7 +8,7 @@ var userSchema = new Schema({
   password: {type: String, required: true, max: 100},
   displayName: {type: String, required: true, max: 100},
   key: {type: String},
-  role: {type: [String], enum: roles, required: true}
+  role: {type: String, enum: roles, required: true}
 });
 
 module.exports = mongoose.model("User", userSchema);

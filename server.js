@@ -9,11 +9,11 @@ var crypto = require("crypto");
 var mongoose = require("mongoose");
 
 var User = require("./models/users");
+var Role = require("./models/roles");
 var strings = require("./views/strings.json");
 
-// import {ROLES, PERMISSIONS} from "~/rbac";
-// var PERMISSIONS = require("./rbac/permissions");
-var eventTemplate = require("./auditing/event");
+var PERMISSIONS = require("./rbac/permissions");
+var saveEvent = require("./auditing/saveEvent");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
@@ -109,8 +109,11 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-function authorise(req, res, role) {
-  return req.user.role === role;
+function authorise(req, res, action) {
+  Role.find({name: req.user.role}, function(err, role) {
+    console.log("ROLE", role);
+    return role.permissions.includes(action);
+  });
 }
 
 function isLoggedIn(req, res, next) {
@@ -137,9 +140,12 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
   res.redirect("/profile");
 });
 
+app.post("/eventTest", function(req, res) {
+  saveEvent({user: {username: "TestName", role: ["voter"]}, action: "vote"});
+});
+
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  if (authorise(req, res, "voter")) {
-    const event = eventTemplate(req.user, "vote");
+  if (authorise(req, res, "vote")) {
     res.render("vote", {user: req.user});
   } else {
     res.redirect("/profile");
