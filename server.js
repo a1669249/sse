@@ -10,13 +10,14 @@ var mongoose = require("mongoose");
 
 var User = require("./models/users");
 var Role = require("./models/roles");
+var Event = require("./models/events");
 var strings = require("./views/strings.json");
 
 var PERMISSIONS = require("./rbac/permissions");
-var saveEvent = require("./auditing/saveEvent");
+// var saveEvent = require("./auditing/saveEvent");
 
 //Set up default mongoose connection
-//Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/<DatabaseName>?retryWrites=true&w=majority
+//Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
 var mongoDB =
   "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
 mongoose.connect(
@@ -85,6 +86,26 @@ passport.deserializeUser(function(id, cb) {
   });
 });
 
+function saveEvent({user, action}) {
+  return new Promise(function(resolve, reject) {
+    let event = new Event({
+      timestamp: new Date(),
+      action,
+      user:
+        user.role === "voter" ? user.role : `${user.username} (${user.role})`
+    });
+    event.save(function(err) {
+      if (err) {
+        reject(err);
+        console.log(err);
+        return;
+      }
+      resolve(event);
+      console.log(event);
+    });
+  });
+}
+
 // Create a new Express application.
 var app = express();
 
@@ -109,9 +130,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-function authorise(req, res, action) {
-  Role.find({name: req.user.role}, function(err, role) {
-    console.log("ROLE", role);
+function authorise(role, action) {
+  Role.findOne({name: role}, function(err, role) {
     return role.permissions.includes(action);
   });
 }
@@ -140,16 +160,35 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
   res.redirect("/profile");
 });
 
+app.post("/audit", function(req, res) {
+  console.log("REQ.BODY", req.body);
+  User.findOne({username: req.body.username}, function(err, user) {
+    var authorised = authorise(user.role, "audit");
+    console.log("AUTHORISED", authorised);
+    if (authorise(user.role, "audit")) {
+      return res.send(Event.find());
+    } else {
+      res.redirect(401);
+    }
+  });
+});
+
 app.post("/eventTest", function(req, res) {
-  saveEvent({user: {username: "TestName", role: ["voter"]}, action: "vote"});
+  let promise = saveEvent({
+    user: {username: "TestName", role: "delegate"},
+    action: "vote"
+  });
+  Promise.resolve(promise).then(() => {
+    res.send();
+  });
 });
 
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  if (authorise(req, res, "vote")) {
-    res.render("vote", {user: req.user});
-  } else {
-    res.redirect("/profile");
-  }
+  // if (authorise(req, res, "vote")) {
+  res.render("vote", {user: req.user});
+  // } else {
+  // res.redirect("/profile");
+  // }
 });
 
 app.get("/totp-input", isLoggedIn, function(req, res) {
