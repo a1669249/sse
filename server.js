@@ -150,18 +150,15 @@ function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
-    res.redirect("/login");
+    res.redirect("/logout");
   }
 }
 
 function ensureTotp(req, res, next) {
-  if (
-    (req.user.key && req.session.method == "totp") ||
-    (!req.user.key && req.session.method == "plain")
-  ) {
+  if ((req.session.secondFactor && req.session.method == "totp")||(!req.user.key && req.session.method == "plain")){
     next();
-  } else {
-    res.redirect("/login");
+  }else{
+    res.redirect("/logout");
   }
 }
 
@@ -215,13 +212,11 @@ app.get("/totp-input", isLoggedIn, function(req, res) {
   });
 });
 
-app.post(
-  "/totp-input",
-  isLoggedIn,
-  passport.authenticate("totp", {
-    failureRedirect: "/login",
-    successRedirect: "/profile"
-  })
+app.post("/totp-input", isLoggedIn,passport.authenticate("totp", {failureRedirect: "/login"}),
+  function(req,res){
+    req.session.secondFactor = "totp";
+    res.redirect("/profile");
+  }
 );
 
 app.get("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
@@ -286,7 +281,8 @@ app.post(
 
 app.get("/logout", function(req, res) {
   req.logout();
-  res.redirect("/");
+  req.session.secondFactor=undefined;
+  res.redirect("/login");
 });
 
 app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
