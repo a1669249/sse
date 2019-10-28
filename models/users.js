@@ -1,7 +1,5 @@
 var mongoose = require("mongoose"),
   Schema = mongoose.Schema;
-// var permissions = require("../rbac/permissions");
-// var roles = Object.keys(permissions);
 
 var userSchema = new Schema({
   username: {type: String, required: true, max: 100, index: true},

@@ -13,7 +13,6 @@ var Role = require("./models/roles");
 var Event = require("./models/events");
 var strings = require("./views/strings.json");
 
-var PERMISSIONS = require("./rbac/permissions");
 // var saveEvent = require("./auditing/saveEvent");
 
 //Set up default mongoose connection
