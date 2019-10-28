@@ -38,7 +38,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(
   new LocalStrategy(function(username, password, cb) {
-    Users.find({username: username}, function(err, user) {
+    User.find({username: username}, function(err, user) {
       if (err) {
         return cb(err);
       }
@@ -192,11 +192,7 @@ app.post("/eventTest", function(req, res) {
 });
 
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  // if (authorise(req, res, "vote")) {
   res.render("vote", {user: req.user});
-  // } else {
-  // res.redirect("/profile");
-  // }
 });
 
 app.get("/totp-input", isLoggedIn, function(req, res) {
