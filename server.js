@@ -38,7 +38,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(
   new LocalStrategy(function(username, password, cb) {
-    User.find({username: username}, function(err, user) {
+    User.findOne({ username: username }, function(err, user) {
       if (err) {
         return cb(err);
       }
@@ -250,11 +250,17 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
     var secret = base32.encode(crypto.randomBytes(16));
     secret = secret.toString().replace(/=/g, "");
     req.user.key = secret;
+    User.findOneAndUpdate({_id:req.user.id},{$set:{key:req.user.key}},{new:true},(err,doc)=>{
+      if (err){
+        console.log("Something went wrong when updating data.");
+      }
+      res.redirect("/totp-setup");
+    });
   } else {
     req.session.method = "plain";
     req.user.key = null;
+    res.redirect("/totp-setup");
   }
-  res.redirect("/totp-setup");
 });
 
 app.get("/login", function(req, res) {
