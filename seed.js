@@ -37,6 +37,22 @@ var users = [
     role: "hasVoted"
   },
   {
+    // _id: mongoose.Types.ObjectId("3"),
+    username: "bob",
+    password: "bobby300",
+    displayName: "Bob",
+    key: null,
+    role: "voter"
+  },
+  {
+    // _id: mongoose.Types.ObjectId("4"),
+    username: "toucanboy",
+    password: "qwertyuiop",
+    displayName: "Larry",
+    key: null,
+    role: "voter"
+  },
+  {
     username: "delegate",
     password: "secret",
     displayName: "Delegate",
