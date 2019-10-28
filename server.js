@@ -136,9 +136,13 @@ app.use(passport.session());
 // checks for the relevant authorisation for a users actions
 // if the desired action is not present in the permissions of their role, they are denied
 // this function can be placed before any action to determine whether it should be completed
-function authorise(role, action) {
-  Role.findOne({name: role}, function(err, role) {
-    return role.permissions.includes(action);
+function auth(role, action) {
+  return new Promise(function(resolve, reject) {
+    Role.findOne({name: role}, function(err, role) {
+      if (role.permissions.includes(action)) {
+        resolve(true);
+      } else resolve(false);
+    });
   });
 }
 
@@ -171,13 +175,18 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
 app.post("/audit", function(req, res) {
   console.log("REQ.BODY", req.body);
   User.findOne({username: req.body.username}, function(err, user) {
-    var authorised = authorise(user.role, "audit");
-    console.log("AUTHORISED", authorised);
-    if (authorise(user.role, "audit")) {
-      return res.send(Event.find());
-    } else {
-      res.redirect(401);
-    }
+    let promise = auth(user.role, "audit");
+    Promise.resolve(promise).then(authd => {
+      if (authd) {
+        Event.find({}, function(err, events) {
+          return res.render("audit", {events: events});
+        });
+      } else {
+        res.redirect(401);
+      }
+    });
+    // auth(user.role, "audit", function(err, authd) {
+    // });
   });
 });
 
@@ -192,11 +201,7 @@ app.post("/eventTest", function(req, res) {
 });
 
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  // if (authorise(req, res, "vote")) {
   res.render("vote", {user: req.user});
-  // } else {
-  // res.redirect("/profile");
-  // }
 });
 
 app.get("/totp-input", isLoggedIn, function(req, res) {
