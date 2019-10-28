@@ -45,6 +45,7 @@ var users = [
   }
 ];
 
+//the default roles
 var roles = [
   {name: "voter", permissions: ["vote"]},
   {name: "hasVoted", permissions: []},

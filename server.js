@@ -86,6 +86,10 @@ passport.deserializeUser(function(id, cb) {
   });
 });
 
+// creates a new event based on the user performing it and the action
+// if the user is a voter, then their name is not recorded
+// it is recorded if they are a delegate or admin, for accountability purposes
+// this function can be placed within any action to record an event
 function saveEvent({user, action}) {
   return new Promise(function(resolve, reject) {
     let event = new Event({
@@ -130,6 +134,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// checks for the relevant authorisation for a users actions
+// if the desired action is not present in the permissions of their role, they are denied
+// this function can be placed before any action to determine whether it should be completed
 function authorise(role, action) {
   Role.findOne({name: role}, function(err, role) {
     return role.permissions.includes(action);
@@ -160,6 +167,8 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
   res.redirect("/profile");
 });
 
+// retrieves every action performed since events began being recorded, and exports them
+// granted the requester has the relevant permissions
 app.post("/audit", function(req, res) {
   console.log("REQ.BODY", req.body);
   User.findOne({username: req.body.username}, function(err, user) {
