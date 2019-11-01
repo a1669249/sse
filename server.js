@@ -112,6 +112,8 @@ function saveEvent({user, action}) {
 // Create a new Express application.
 var app = express();
 
+app.use(express.static('public'));
+
 // Configure view engine to render EJS templates.
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");

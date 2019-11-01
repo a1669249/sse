@@ -6,32 +6,24 @@
 		<link rel='stylesheet' href='/stylesheets/style.css'>
 		<link rel='stylesheet' href='/libraries/bootstrap/css/bootstrap.min.css'>
 		<!-- Libraries -->
-		<script src='/libraries/jquery.min.js'/>
-		<script src='/libraries/bootstrap/js/bootstrap.bundle.js'/>
+		<script src='/libraries/jquery.min.js'></script>
+		<script src='/libraries/bootstrap/js/bootstrap.bundle.js'></script>
 	</head>
 	<body>
 		<div class="container-fluid">
 			<div id="header" class="row">
-				<div class="col">
+				<div class="col align-middle">
 					<img src="/images/aec-logo-homepage.png">
 				</div>
-				<div class="col">
-					<a href="/logout">Log out</a>
+				<div class="col align-middle text-right">
+					<a class="btn btn-dark" href="/logout">Log out</a>
 				</div>
 			</div>
 			<div id="content" class="row">
-				<p>
-					ID: <%= user.id %><br>
-					Username: <%= user.username %><br>
-					Name: <%= user.displayName %><br>
-				</p>
-				<br>
 				<h1>Vote</h1>
 			</div>
 			<div id="footer" class="row">
 			</div>
 		</div>
-		
-		
 	</body>
 </html>
