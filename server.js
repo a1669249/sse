@@ -249,6 +249,7 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
       if (err){
         console.log("Something went wrong when updating data.");
       }
+      req.session.secondFactor = "totp";
       res.redirect("/totp-setup");
     });
   } else {
