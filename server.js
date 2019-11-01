@@ -166,7 +166,8 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-  res.redirect("/profile");
+  //RENDER DELEGATE
+  //RENDER USER
 });
 
 // retrieves every action performed since events began being recorded, and exports them
@@ -215,7 +216,7 @@ app.post(
   passport.authenticate("totp", {failureRedirect: "/login"}),
   function(req, res) {
     req.session.secondFactor = "totp";
-    res.redirect("/profile");
+    res.redirect("/");
   }
 );
 
@@ -253,9 +254,9 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
         if (err) {
           console.log("Something went wrong when updating data.");
         }
+        req.session.secondFactor = "totp";
         res.redirect("/totp-setup");
-      }
-    );
+      });
   } else {
     req.session.method = "plain";
     req.user.key = null;
@@ -279,7 +280,7 @@ app.post(
       res.redirect("/totp-input");
     } else {
       req.session.method = "plain";
-      res.redirect("/profile");
+      res.redirect("/totp-setup");
     }
   }
 );
@@ -288,10 +289,6 @@ app.get("/logout", function(req, res) {
   req.logout();
   req.session.secondFactor = undefined;
   res.redirect("/login");
-});
-
-app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
-  res.render("profile", {user: req.user});
 });
 
 app.listen(3000);
