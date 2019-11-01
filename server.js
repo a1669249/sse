@@ -166,7 +166,20 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-  res.redirect("/profile");
+  if (req.user.role == "voter"){
+    res.render("vote", {user: req.user});
+    //Temp User Pass
+  }
+  if (req.user.role == "hasVoted"){
+    res.render("hasVoted");
+  }
+  if (req.user.role == "delegate"){
+    res.render("delegate");
+  }
+  if (req.user.role == null){
+    console.log("Logic error, account has no role.");
+    res.redirect("/login");
+  }
 });
 
 // retrieves every action performed since events began being recorded, and exports them
@@ -221,7 +234,7 @@ app.post(
   passport.authenticate("totp", {failureRedirect: "/login"}),
   function(req, res) {
     req.session.secondFactor = "totp";
-    res.redirect("/profile");
+    res.redirect("/");
   }
 );
 
@@ -259,6 +272,7 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
         if (err) {
           console.log("Something went wrong when updating data.");
         }
+        res.session.secondFactor = "totp";
         res.redirect("/totp-setup");
       }
     );
@@ -285,7 +299,7 @@ app.post(
       res.redirect("/totp-input");
     } else {
       req.session.method = "plain";
-      res.redirect("/profile");
+      res.redirect("/");
     }
   }
 );
@@ -295,9 +309,4 @@ app.get("/logout", function(req, res) {
   req.session.secondFactor = undefined;
   res.redirect("/login");
 });
-
-app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
-  res.render("profile", {user: req.user});
-});
-
 app.listen(3000);
