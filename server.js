@@ -11,6 +11,7 @@ var mongoose = require("mongoose");
 var User = require("./models/users");
 var Role = require("./models/roles");
 var Event = require("./models/events");
+var Ballot = require("./models/ballots");
 var strings = require("./views/strings.json");
 
 // var saveEvent = require("./auditing/saveEvent");
@@ -189,6 +190,12 @@ app.post("/eventTest", function(req, res) {
 
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
   res.render("vote", {user: req.user});
+});
+
+app.post("/editBallot", isLoggedIn, auth, function(req, res) {
+  Ballot.findOne({}, function(err, ballot) {
+    res.render("editBallot", {ballot});
+  });
 });
 
 app.get("/totp-input", isLoggedIn, function(req, res) {

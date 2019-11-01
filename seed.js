@@ -3,6 +3,7 @@
 var mongoose = require("mongoose");
 var User = require("./models/users");
 var Role = require("./models/roles");
+var Ballot = require("./models/ballots");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
@@ -18,6 +19,18 @@ var db = mongoose.connection;
 
 //Bind connection to error event (to get notification of connection errors)
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
+
+var ballots = [
+  {
+    electorate: "Adelaide",
+    above: ["Hemp Party", "Rain Party", "Other Hemp Party"],
+    below: [
+      {party: "Hemp Party", candidates: ["candidate1", "candidate2"]},
+      {party: "Rain Party", candidates: ["candidate1", "candidate2"]},
+      {party: "Other Hemp Party", candidates: ["candidate1", "candidate2"]}
+    ]
+  }
+];
 
 var users = [
   {
@@ -66,7 +79,7 @@ var roles = [
   {name: "voter", permissions: ["vote"]},
   {name: "hasVoted", permissions: []},
   {name: "admin", permissions: ["createDelegate", "audit"]},
-  {name: "delegate", permissions: ["audit"]}
+  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot"]}
 ];
 
 function createUser(details) {
@@ -80,6 +93,21 @@ function createUser(details) {
       }
       resolve(user);
       console.log(user);
+    });
+  });
+}
+
+function createBallot(details) {
+  return new Promise(function(resolve, reject) {
+    let ballot = new Ballot(details);
+    ballot.save(function(err) {
+      if (err) {
+        reject(err);
+        console.log(err);
+        return;
+      }
+      resolve(ballot);
+      console.log(ballot);
     });
   });
 }
@@ -110,6 +138,12 @@ function seed(cb) {
     let promise = createRole(role);
     promises.push(promise);
   });
+
+  ballots.forEach(ballot => {
+    let promise = createBallot(ballot);
+    promises.push(promise);
+  });
+
   Promise.all(promises).then(cb);
 }
 
