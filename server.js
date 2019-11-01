@@ -250,9 +250,7 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
         }
         res.redirect("/totp-setup");
       }
-      req.session.secondFactor = "totp";
-      res.redirect("/totp-setup");
-    });
+    );
   } else {
     req.session.method = "plain";
     req.user.key = null;

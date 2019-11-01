@@ -14,6 +14,7 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "passport-totp": "0.0.2",
-    "sprintf": "^0.1.5"
+    "sprintf": "^0.1.5",
+    "thirty-two": "^1.0.2"
   }
 }
