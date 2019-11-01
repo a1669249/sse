@@ -1,64 +1,119 @@
 #! /user/bin/env node
 
-var mongoose = require('mongoose');
-var User = require('./models/users');
-
+var mongoose = require("mongoose");
+var User = require("./models/users");
+var Role = require("./models/roles");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
-var mongoDB = 'mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+var mongoDB =
+  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
+mongoose.connect(
+  mongoDB,
+  {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true}
+);
 
 //Get the default connection
 var db = mongoose.connection;
 
 //Bind connection to error event (to get notification of connection errors)
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 var users = [
-    {
-        // _id: mongoose.Types.ObjectId("1"),
-        username: "jack",
-        password: "secret",
-        displayName: "Jack",
-        key: null,
-        role: ["voter"]
-    },
-    {
-        // _id: mongoose.Types.ObjectId("2"),
-        username: "jill",
-        password: "birthday",
-        displayName: "Jill",
-        key: null,
-        role: ["voter", "hasVoted"]
-    }
+  {
+    // _id: mongoose.Types.ObjectId("1"),
+    username: "jack",
+    password: "secret",
+    displayName: "Jack",
+    key: null,
+    role: "voter"
+  },
+  {
+    // _id: mongoose.Types.ObjectId("2"),
+    username: "jill",
+    password: "birthday",
+    displayName: "Jill",
+    key: null,
+    role: "hasVoted"
+  },
+  {
+    // _id: mongoose.Types.ObjectId("3"),
+    username: "bob",
+    password: "bobby300",
+    displayName: "Bob",
+    key: null,
+    role: "voter"
+  },
+  {
+    // _id: mongoose.Types.ObjectId("4"),
+    username: "toucanboy",
+    password: "qwertyuiop",
+    displayName: "Larry",
+    key: null,
+    role: "voter"
+  },
+  {
+    username: "delegate",
+    password: "secret",
+    displayName: "Delegate",
+    key: null,
+    role: "delegate"
+  }
+];
+
+//the default roles
+var roles = [
+  {name: "voter", permissions: ["vote"]},
+  {name: "hasVoted", permissions: []},
+  {name: "admin", permissions: ["createDelegate", "audit"]},
+  {name: "delegate", permissions: ["audit"]}
 ];
 
 function createUser(details) {
-    return new Promise(function(resolve, reject) {
-        let user = new User(details);
-        user.save(function (err) {
-            if(err) {
-                reject(err);
-                console.log(err);
-                return;
-            }
-            resolve(user);
-            console.log(user);
-        });
+  return new Promise(function(resolve, reject) {
+    let user = new User(details);
+    user.save(function(err) {
+      if (err) {
+        reject(err);
+        console.log(err);
+        return;
+      }
+      resolve(user);
+      console.log(user);
     });
+  });
 }
 
-function createUsers(cb) {
-    let promises = [];
-    users.forEach(user => {
-        let promise = createUser(user);
-        promises.push(promise);
+function createRole(details) {
+  return new Promise(function(resolve, reject) {
+    let role = new Role(details);
+    role.save(function(err) {
+      if (err) {
+        reject(err);
+        console.log(err);
+        return;
+      }
+      resolve(role);
+      console.log(role);
     });
-    Promise.all(promises).then(cb);
+  });
 }
 
-createUsers(function() {
-    //Finished
-    mongoose.connection.close();
+function seed(cb) {
+  let promises = [];
+  users.forEach(user => {
+    let promise = createUser(user);
+    promises.push(promise);
+  });
+
+  roles.forEach(role => {
+    let promise = createRole(role);
+    promises.push(promise);
+  });
+  Promise.all(promises).then(cb);
+}
+
+seed(function() {
+  //Finished
+  mongoose.connection.close();
 });

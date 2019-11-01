@@ -9,16 +9,16 @@ var crypto = require("crypto");
 var mongoose = require("mongoose");
 
 var User = require("./models/users");
+var Role = require("./models/roles");
+var Event = require("./models/events");
 var strings = require("./views/strings.json");
 
-// import {ROLES, PERMISSIONS} from "~/rbac";
-// var PERMISSIONS = require("./rbac/permissions");
-var eventTemplate = require("./auditing/event");
+// var saveEvent = require("./auditing/saveEvent");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
 var mongoDB =
-  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/test?retryWrites=true&w=majority";
+  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
 mongoose.connect(
   mongoDB,
   {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true}
@@ -38,7 +38,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(
   new LocalStrategy(function(username, password, cb) {
-    Users.find({username: username}, function(err, user) {
+    User.findOne({ username: username }, function(err, user) {
       if (err) {
         return cb(err);
       }
@@ -85,6 +85,30 @@ passport.deserializeUser(function(id, cb) {
   });
 });
 
+// creates a new event based on the user performing it and the action
+// if the user is a voter, then their name is not recorded
+// it is recorded if they are a delegate or admin, for accountability purposes
+// this function can be placed within any action to record an event
+function saveEvent({user, action}) {
+  return new Promise(function(resolve, reject) {
+    let event = new Event({
+      timestamp: new Date(),
+      action,
+      user:
+        user.role === "voter" ? user.role : `${user.username} (${user.role})`
+    });
+    event.save(function(err) {
+      if (err) {
+        reject(err);
+        console.log(err);
+        return;
+      }
+      resolve(event);
+      console.log(event);
+    });
+  });
+}
+
 // Create a new Express application.
 var app = express();
 
@@ -109,26 +133,32 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-function authorise(req, res, role) {
-  return req.user.role === role;
+// checks for the relevant authorisation for a users actions
+// if the desired action is not present in the permissions of their role, they are denied
+// this function can be placed before any action to determine whether it should be completed
+function auth(role, action) {
+  return new Promise(function(resolve, reject) {
+    Role.findOne({name: role}, function(err, role) {
+      if (role.permissions.includes(action)) {
+        resolve(true);
+      } else resolve(false);
+    });
+  });
 }
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
-    res.redirect("/login");
+    res.redirect("/logout");
   }
 }
 
 function ensureTotp(req, res, next) {
-  if (
-    (req.user.key && req.session.method == "totp") ||
-    (!req.user.key && req.session.method == "plain")
-  ) {
+  if ((req.session.secondFactor && req.session.method == "totp")||(!req.user.key && req.session.method == "plain")){
     next();
-  } else {
-    res.redirect("/login");
+  }else{
+    res.redirect("/logout");
   }
 }
 
@@ -137,13 +167,38 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
   res.redirect("/profile");
 });
 
+// retrieves every action performed since events began being recorded, and exports them
+// granted the requester has the relevant permissions
+app.post("/audit", function(req, res) {
+  console.log("REQ.BODY", req.body);
+  User.findOne({username: req.body.username}, function(err, user) {
+    let promise = auth(user.role, "audit");
+    Promise.resolve(promise).then(authd => {
+      if (authd) {
+        Event.find({}, function(err, events) {
+          return res.render("audit", {events: events});
+        });
+      } else {
+        res.redirect(401);
+      }
+    });
+    // auth(user.role, "audit", function(err, authd) {
+    // });
+  });
+});
+
+app.post("/eventTest", function(req, res) {
+  let promise = saveEvent({
+    user: {username: "TestName", role: "delegate"},
+    action: "vote"
+  });
+  Promise.resolve(promise).then(() => {
+    res.send();
+  });
+});
+
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  if (authorise(req, res, "voter")) {
-    const event = eventTemplate(req.user, "vote");
-    res.render("vote", {user: req.user});
-  } else {
-    res.redirect("/profile");
-  }
+  res.render("vote", {user: req.user});
 });
 
 app.get("/totp-input", isLoggedIn, function(req, res) {
@@ -157,13 +212,11 @@ app.get("/totp-input", isLoggedIn, function(req, res) {
   });
 });
 
-app.post(
-  "/totp-input",
-  isLoggedIn,
-  passport.authenticate("totp", {
-    failureRedirect: "/login",
-    successRedirect: "/profile"
-  })
+app.post("/totp-input", isLoggedIn,passport.authenticate("totp", {failureRedirect: "/login"}),
+  function(req,res){
+    req.session.secondFactor = "totp";
+    res.redirect("/profile");
+  }
 );
 
 app.get("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
@@ -192,11 +245,17 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
     var secret = base32.encode(crypto.randomBytes(16));
     secret = secret.toString().replace(/=/g, "");
     req.user.key = secret;
+    User.findOneAndUpdate({_id:req.user.id},{$set:{key:req.user.key}},{new:true},(err,doc)=>{
+      if (err){
+        console.log("Something went wrong when updating data.");
+      }
+      res.redirect("/totp-setup");
+    });
   } else {
     req.session.method = "plain";
     req.user.key = null;
+    res.redirect("/totp-setup");
   }
-  res.redirect("/totp-setup");
 });
 
 app.get("/login", function(req, res) {
@@ -222,7 +281,8 @@ app.post(
 
 app.get("/logout", function(req, res) {
   req.logout();
-  res.redirect("/");
+  req.session.secondFactor=undefined;
+  res.redirect("/login");
 });
 
 app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
