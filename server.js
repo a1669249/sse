@@ -38,7 +38,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 // will be set at `req.user` in route handlers after authentication.
 passport.use(
   new LocalStrategy(function(username, password, cb) {
-    User.findOne({ username: username }, function(err, user) {
+    User.findOne({username: username}, function(err, user) {
       if (err) {
         return cb(err);
       }
@@ -136,13 +136,11 @@ app.use(passport.session());
 // checks for the relevant authorisation for a users actions
 // if the desired action is not present in the permissions of their role, they are denied
 // this function can be placed before any action to determine whether it should be completed
-function auth(role, action) {
-  return new Promise(function(resolve, reject) {
-    Role.findOne({name: role}, function(err, role) {
-      if (role.permissions.includes(action)) {
-        resolve(true);
-      } else resolve(false);
-    });
+function auth(req, res, next) {
+  Role.findOne({name: req.user.role}, function(err, role) {
+    if (role.permissions.includes(req.originalUrl.split("/")[1])) {
+      next();
+    } else res.sendStatus(401);
   });
 }
 
@@ -155,9 +153,12 @@ function isLoggedIn(req, res, next) {
 }
 
 function ensureTotp(req, res, next) {
-  if ((req.session.secondFactor && req.session.method == "totp")||(!req.user.key && req.session.method == "plain")){
+  if (
+    (req.session.secondFactor && req.session.method == "totp") ||
+    (!req.user.key && req.session.method == "plain")
+  ) {
     next();
-  }else{
+  } else {
     res.redirect("/logout");
   }
 }
@@ -169,21 +170,10 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
 
 // retrieves every action performed since events began being recorded, and exports them
 // granted the requester has the relevant permissions
-app.post("/audit", function(req, res) {
-  console.log("REQ.BODY", req.body);
-  User.findOne({username: req.body.username}, function(err, user) {
-    let promise = auth(user.role, "audit");
-    Promise.resolve(promise).then(authd => {
-      if (authd) {
-        Event.find({}, function(err, events) {
-          return res.render("audit", {events: events});
-        });
-      } else {
-        res.redirect(401);
-      }
-    });
-    // auth(user.role, "audit", function(err, authd) {
-    // });
+app.post("/audit", isLoggedIn, auth, function(req, res) {
+  saveEvent({user: req.user, action: "Auditing"});
+  Event.find({}, function(err, events) {
+    return res.render("audit", {events});
   });
 });
 
@@ -212,8 +202,11 @@ app.get("/totp-input", isLoggedIn, function(req, res) {
   });
 });
 
-app.post("/totp-input", isLoggedIn,passport.authenticate("totp", {failureRedirect: "/login"}),
-  function(req,res){
+app.post(
+  "/totp-input",
+  isLoggedIn,
+  passport.authenticate("totp", {failureRedirect: "/login"}),
+  function(req, res) {
     req.session.secondFactor = "totp";
     res.redirect("/profile");
   }
@@ -245,9 +238,15 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
     var secret = base32.encode(crypto.randomBytes(16));
     secret = secret.toString().replace(/=/g, "");
     req.user.key = secret;
-    User.findOneAndUpdate({_id:req.user.id},{$set:{key:req.user.key}},{new:true},(err,doc)=>{
-      if (err){
-        console.log("Something went wrong when updating data.");
+    User.findOneAndUpdate(
+      {_id: req.user.id},
+      {$set: {key: req.user.key}},
+      {new: true},
+      (err, doc) => {
+        if (err) {
+          console.log("Something went wrong when updating data.");
+        }
+        res.redirect("/totp-setup");
       }
       req.session.secondFactor = "totp";
       res.redirect("/totp-setup");
@@ -282,7 +281,7 @@ app.post(
 
 app.get("/logout", function(req, res) {
   req.logout();
-  req.session.secondFactor=undefined;
+  req.session.secondFactor = undefined;
   res.redirect("/login");
 });
 
