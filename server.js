@@ -166,8 +166,7 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-  //RENDER DELEGATE
-  //RENDER USER
+  res.redirect("/profile");
 });
 
 // retrieves every action performed since events began being recorded, and exports them
@@ -199,6 +198,12 @@ app.post("/editBallot", isLoggedIn, auth, function(req, res) {
   });
 });
 
+app.post("/saveBallot", isLoggedIn, auth, function(req, res) {
+  Ballot.findOne({}, function(err, ballot) {
+    res.render("editBallot", {ballot});
+  });
+});
+
 app.get("/totp-input", isLoggedIn, function(req, res) {
   if (!req.user.key) {
     console.log("Logic error, totp-input requested with no key set");
@@ -216,7 +221,7 @@ app.post(
   passport.authenticate("totp", {failureRedirect: "/login"}),
   function(req, res) {
     req.session.secondFactor = "totp";
-    res.redirect("/");
+    res.redirect("/profile");
   }
 );
 
@@ -254,9 +259,9 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
         if (err) {
           console.log("Something went wrong when updating data.");
         }
-        req.session.secondFactor = "totp";
         res.redirect("/totp-setup");
-      });
+      }
+    );
   } else {
     req.session.method = "plain";
     req.user.key = null;
@@ -280,7 +285,7 @@ app.post(
       res.redirect("/totp-input");
     } else {
       req.session.method = "plain";
-      res.redirect("/totp-setup");
+      res.redirect("/profile");
     }
   }
 );
@@ -289,6 +294,10 @@ app.get("/logout", function(req, res) {
   req.logout();
   req.session.secondFactor = undefined;
   res.redirect("/login");
+});
+
+app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
+  res.render("profile", {user: req.user});
 });
 
 app.listen(3000);
