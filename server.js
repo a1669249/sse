@@ -170,7 +170,9 @@ function ensureTotp(req, res, next) {
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
 
   if (req.user.role == "voter"){
-    res.render("vote", {user: req.user});
+    Ballot.findOne({}, function(err, ballot) {
+      res.render("vote",{ballot});
+    });
     //Temp User Pass
   }
   if (req.user.role == "hasVoted"){
