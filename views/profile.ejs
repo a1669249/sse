@@ -1,0 +1,18 @@
+<p>
+ID: <%= user.id %><br/>
+Username: <%= user.username %><br/>
+Name: <%= user.displayName %><br/>
+Secret: <%= user.key %><br/>
+</p>
+
+<form action="/audit" method="post">
+	<input type="submit" value="Audit"/>
+</form>
+
+<form action="/editBallot" method="post">
+	<input type="submit" value="Edit Ballot"/>
+</form>
+
+<a href="/totp-setup">View/Setup Two-Factor Authentication</a>
+<br>
+<a href="/logout">Log out</a>

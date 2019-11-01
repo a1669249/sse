@@ -11,6 +11,7 @@ var mongoose = require("mongoose");
 var User = require("./models/users");
 var Role = require("./models/roles");
 var Event = require("./models/events");
+var Ballot = require("./models/ballots");
 var strings = require("./views/strings.json");
 
 // var saveEvent = require("./auditing/saveEvent");
@@ -203,6 +204,18 @@ app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
   res.render("vote", {user: req.user});
 });
 
+app.post("/editBallot", isLoggedIn, auth, function(req, res) {
+  Ballot.findOne({}, function(err, ballot) {
+    res.render("editBallot", {ballot});
+  });
+});
+
+app.post("/saveBallot", isLoggedIn, auth, function(req, res) {
+  Ballot.findOne({}, function(err, ballot) {
+    res.render("editBallot", {ballot});
+  });
+});
+
 app.get("/totp-input", isLoggedIn, function(req, res) {
   if (!req.user.key) {
     console.log("Logic error, totp-input requested with no key set");
@@ -220,7 +233,7 @@ app.post(
   passport.authenticate("totp", {failureRedirect: "/login"}),
   function(req, res) {
     req.session.secondFactor = "totp";
-    res.redirect("/");
+    res.redirect("/profile");
   }
 );
 
@@ -258,9 +271,9 @@ app.post("/totp-setup", isLoggedIn, ensureTotp, function(req, res) {
         if (err) {
           console.log("Something went wrong when updating data.");
         }
-        req.session.secondFactor = "totp";
         res.redirect("/totp-setup");
-      });
+      }
+    );
   } else {
     req.session.method = "plain";
     req.user.key = null;
@@ -284,7 +297,7 @@ app.post(
       res.redirect("/totp-input");
     } else {
       req.session.method = "plain";
-      res.redirect("/totp-setup");
+      res.redirect("/profile");
     }
   }
 );
@@ -293,6 +306,10 @@ app.get("/logout", function(req, res) {
   req.logout();
   req.session.secondFactor = undefined;
   res.redirect("/login");
+});
+
+app.get("/profile", isLoggedIn, ensureTotp, function(req, res) {
+  res.render("profile", {user: req.user});
 });
 
 app.listen(3000);
