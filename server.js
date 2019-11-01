@@ -165,8 +165,19 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-  //RENDER DELEGATE
-  //RENDER USER
+  if (req.user.role == "voter"){
+    res.render("vote");
+  }
+  if (req.user.role == "hasVoted"){
+    res.render("hasVoted");
+  }
+  if (req.user.role == "delegate"){
+    res.render("delegate");
+  }
+  if (req.user.role == null){
+    console.log("Logic error, account has no role.");
+    res.redirect("/login");
+  }
 });
 
 // retrieves every action performed since events began being recorded, and exports them
