@@ -1,42 +1,19 @@
 {
   "name": "sse",
   "version": "0.0.0",
-  "description": "Express 4.x app using Passport for authentication with username and password.",
-  "keywords": [
-    "example",
-    "express",
-    "passport"
-  ],
-  "author": "Jared Hanson",
-  "license": "Unlicense",
-  "homepage": "https://github.com/passport/express-4.x-local-example",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/passport/express-4.x-local-example.git"
-  },
-  "bugs": {
-    "url": "https://github.com/passport/express-4.x-local-example/issues"
-  },
   "scripts": {
     "seed": "node seed.js"
   },
   "dependencies": {
-    "bcrypt": "^3.0.6",
-    "body-parser": "^1.19.0",
-    "connect-ensure-login": "^0.1.1",
     "crypto": "^1.0.1",
-    "debug": "~2.6.9",
     "ejs": "^2.6.2",
     "express": "^4.17.1",
     "express-session": "^1.16.1",
-    "http-errors": "~1.6.3",
     "mongoose": "^5.7.5",
     "morgan": "^1.9.1",
     "passport": "^0.4.0",
-    "passport-2fa-totp": "0.0.1",
     "passport-local": "^1.0.0",
     "passport-totp": "0.0.2",
     "sprintf": "^0.1.5"
-  },
-  "devDependencies": {}
+  }
 }
