@@ -166,6 +166,7 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
+
   if (req.user.role == "voter"){
     res.render("vote", {user: req.user});
     //Temp User Pass
@@ -174,7 +175,9 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
     res.render("hasVoted");
   }
   if (req.user.role == "delegate"){
-    res.render("delegate");
+    Ballot.findOne({}, function(err, ballot) {
+      res.render("delegate",{ballot});
+    });
   }
   if (req.user.role == null){
     console.log("Logic error, account has no role.");
@@ -299,6 +302,7 @@ app.post(
       res.redirect("/totp-input");
     } else {
       req.session.method = "plain";
+      //CHANGE TO TOTP-SETUP BEFORE RELEASE
       res.redirect("/");
     }
   }
