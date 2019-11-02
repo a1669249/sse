@@ -18,12 +18,12 @@
         <div class="text-center m-auto">
         </div>
         <div class="col text-right m-auto">
-          <a class="btn btn-dark" href="/logout">Log out</a>
+          <a class="btn btn-dark" href="/auth/logout">Log out</a>
         </div>
       </div>
       <div id="content">
         <br>
-        <form  action="/totp-input" method="post">
+        <form  action="/auth/login/2fa" method="post">
           <div class="row">
             <div class="col">
               <input type="password" class="form-control text-center" name="code" placeholder="Authenticator Code">
