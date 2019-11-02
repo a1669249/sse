@@ -7,15 +7,13 @@ module.exports = function(app) {
   app.get("/", auth.isLoggedIn, auth.ensureTotp, function(req, res) {
     switch (req.user.role) {
       case "voter":
-        res.redirect("/api/vote");
+        res.render("vote");
         break;
       case "hasVoted":
-        res.redirect("hasVoted");
+        res.render("hasVoted");
         break;
       case "delegate":
-        Ballot.findOne({}, function(err, ballot) {
-          res.render("delegate",{ballot});
-        });
+        res.render("delegate");
         break;
       default:
         console.log("Logic error, account has no role.");

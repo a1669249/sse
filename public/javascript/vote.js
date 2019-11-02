@@ -3,7 +3,7 @@ var belowInput = new Map();
 var totalCandidates = 0;
 var totalParties = 0;
 
-$.get('ballot', function(ballot){
+$.get('/api/ballot', function(ballot){
 	pageSetup(ballot)
 });
 
@@ -112,6 +112,6 @@ function submitVote(){
 		});
 
 		// Send vote to server
-		$.post('submitVote',vote);
+		$.post('/api/vote',vote);
 	}
 }
