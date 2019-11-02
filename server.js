@@ -90,13 +90,15 @@ passport.deserializeUser(function(id, cb) {
 // if the user is a voter, then their name is not recorded
 // it is recorded if they are a delegate or admin, for accountability purposes
 // this function can be placed within any action to record an event
-function saveEvent({user, action}) {
+function saveEvent({user, action, from, to}) {
   return new Promise(function(resolve, reject) {
     let event = new Event({
       timestamp: new Date(),
       action,
       user:
-        user.role === "voter" ? user.role : `${user.username} (${user.role})`
+        user.role === "voter" ? user.role : `${user.username} (${user.role})`,
+      from,
+      to
     });
     event.save(function(err) {
       if (err) {
@@ -193,16 +195,6 @@ app.post("/audit", isLoggedIn, auth, function(req, res) {
   });
 });
 
-app.post("/eventTest", function(req, res) {
-  let promise = saveEvent({
-    user: {username: "TestName", role: "delegate"},
-    action: "vote"
-  });
-  Promise.resolve(promise).then(() => {
-    res.send();
-  });
-});
-
 app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
   res.render("vote", {user: req.user});
 });
@@ -214,8 +206,19 @@ app.post("/editBallot", isLoggedIn, auth, function(req, res) {
 });
 
 app.post("/saveBallot", isLoggedIn, auth, function(req, res) {
-  Ballot.findOne({}, function(err, ballot) {
-    res.render("editBallot", {ballot});
+  Ballot.findOne({_id: req.ballot._id}, function(err, oldBallot) {
+    saveEvent({
+      user: req.user,
+      action: "Saving Ballot",
+      from: oldBallot,
+      to: req.ballot
+    });
+    Ballot.updateOne({_id: req.ballot._id}, req.ballot, function(
+      err,
+      newBallot
+    ) {
+      res.redirect("/");
+    });
   });
 });
 
