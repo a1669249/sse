@@ -71,6 +71,13 @@ var users = [
     displayName: "Delegate",
     key: null,
     role: "delegate"
+  },
+  {
+    username: "admin",
+    password: "admin",
+    displayName: "Admin",
+    key: null,
+    role: "admin"
   }
 ];
 

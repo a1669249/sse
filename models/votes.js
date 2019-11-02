@@ -10,3 +10,13 @@
 //Then we encrypt that base64 string with bcrypt
 // { id: 1, vote: "/aR0kxvjsasO2ZNpUPcUzKSN28TaTm4DP2bw2DqZDzJl2RQCwzuIrfFJdHmrOOfj6hxpzlwmYRg4N2E5JlOxmmzVJIBPyKYWOrGBra92X8FpG7W5r8ilrOfw5IRojcCj"}
 //To count the votes, the algorithm must reverse this process to get the plain votes
+
+var mongoose = require("mongoose"),
+  Schema = mongoose.Schema;
+
+var voteSchema = new Schema({
+  above: {type: [String], required: true},
+  below: {type: [String], required: true},
+});
+
+module.exports = mongoose.model("Vote", voteSchema);
