@@ -9,6 +9,7 @@ function pageSetup(ballot){
 	var aboveLine = document.getElementById('aboveLine');
 	var belowLine = document.getElementById('belowLine');
 	var submitBtn = document.getElementById('submitBtn');
+	var totalCandidates = 0;
 
 	document.getElementById('electorateName').innerHTML = ballot.electorate;
 
@@ -21,12 +22,11 @@ function pageSetup(ballot){
 		baseCol.appendChild(inputCol);
 
 		let voteInput = document.createElement('select');
+		voteInput.options.add(new Option('-',0));
 		for (var i = 0; i < ballot.above.length; i++) {
-			voteInput.options.add(new Option(i+1,i));
+			voteInput.options.add(new Option(i+1,i+1));
 		}
 		inputCol.appendChild(voteInput);
-
-		aboveInput.set(party, voteInput);
 
 		let partyNameCol = document.createElement('div');
 		partyNameCol.classList.add('col');
@@ -34,26 +34,51 @@ function pageSetup(ballot){
 		baseCol.appendChild(partyNameCol);
 
 		aboveLine.appendChild(baseCol);
+		aboveInput.set(party, voteInput);
 	});
 
+	for (var i = 0; i < ballot.below.length; i++){
+		totalCandidates += ballot.below[i].candidates.length;
+	}
+
 	ballot.below.forEach(function(party){
+		// Column for whole party
 		let baseCol = document.createElement('div');
 		baseCol.classList.add('col');
 		
-		// let inputCol = document.createElement('div');
-		// inputCol.classList.add('col');
-		// baseCol.appendChild(inputCol);
+		// Sub-column for party name
+		let partyNameCol = document.createElement('div');
+		partyNameCol.classList.add('col');
+		partyNameCol.innerHTML = party.party;
+		baseCol.appendChild(partyNameCol);
+		
+		for (var i = 0; i < party.candidates.length; i++){
+			// Sub-column per candidate
+			let canCol = document.createElement('div');
+			canCol.classList.add('col');
+			baseCol.appendChild(canCol);
 
-		// let voteInput = document.createElement('select');
-		// for (var i = ballot.above.length - 1; i >= 0; i--) {
-		// 	voteInput.options.add(new Option(i+1,i));
-		// }
-		// inputCol.appendChild(voteInput);
+			// Sub-sub-column for vote input
+			let inputCol = document.createElement('div');
+			inputCol.classList.add('col');
+			canCol.appendChild(inputCol);
 
-		// let partyNameCol = document.createElement('div');
-		// partyNameCol.classList.add('col');
-		// partyNameCol.innerHTML = party;
-		// baseCol.appendChild(partyNameCol);
+			// Input dropdown
+			let voteInput = document.createElement('select');
+			voteInput.options.add(new Option('-',0));
+			for (var j = 0; j < totalCandidates; j++) {
+				voteInput.options.add(new Option(j+1,j+1));
+			}
+			inputCol.appendChild(voteInput);
+
+			// Sub-sub-column for candidate name
+			let canNameCol = document.createElement('div');
+			canNameCol.classList.add('col');
+			canNameCol.innerHTML = party.candidates[i];
+			canCol.appendChild(canNameCol);
+
+			// belowInput.set(party.candidates[i], voteInput);
+		}
 
 		belowLine.appendChild(baseCol);
 	});
