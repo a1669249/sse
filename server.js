@@ -167,22 +167,39 @@ function ensureTotp(req, res, next) {
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
 
-  if (req.user.role == "voter"){
-    res.render("vote", {user: req.user});
-    //Temp User Pass
+  switch (req.user.role) {
+    case "voter":
+      res.render("vote", {user: req.user});
+      break;
+    case "hasVoted":
+      res.render("hasVoted");
+      break;
+    case "delegate":
+      Ballot.findOne({}, function(err, ballot) {
+        res.render("delegate",{ballot});
+      });
+      break;
+    default:
+      console.log("Logic error, account has no role.");
+      res.redirect("/login");
   }
-  if (req.user.role == "hasVoted"){
-    res.render("hasVoted");
-  }
-  if (req.user.role == "delegate"){
-    Ballot.findOne({}, function(err, ballot) {
-      res.render("delegate",{ballot});
-    });
-  }
-  if (req.user.role == null){
-    console.log("Logic error, account has no role.");
-    res.redirect("/login");
-  }
+
+  // if (req.user.role == "voter"){
+  //   res.render("vote", {user: req.user});
+  //   //Temp User Pass
+  // }
+  // if (req.user.role == "hasVoted"){
+  //   res.render("hasVoted");
+  // }
+  // if (req.user.role == "delegate"){
+  //   Ballot.findOne({}, function(err, ballot) {
+  //     res.render("delegate",{ballot});
+  //   });
+  // }
+  // if (req.user.role == null){
+  //   console.log("Logic error, account has no role.");
+  //   res.redirect("/login");
+  // }
 });
 
 // retrieves every action performed since events began being recorded, and exports them
