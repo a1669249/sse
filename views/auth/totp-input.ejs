@@ -9,7 +9,7 @@
     </div>
     <div id="content">
         <h3><%= strings.enterCode %></h3>
-        <form action="/totp-input" method="post">
+        <form action="/auth/login/2fa" method="post">
             <input type="password" name="code" placeholer="<%= strings.enterCode %>">
             <input type="submit">
         </form>
