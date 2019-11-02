@@ -168,24 +168,28 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-
   if (req.user.role == "voter"){
-    Ballot.findOne({}, function(err, ballot) {
-      res.render("vote",{ballot});
-    });
-    //Temp User Pass
+    res.render("vote");
   }
   else if (req.user.role == "hasVoted"){
     res.render("hasVoted");
   }
   else if (req.user.role == "delegate"){
-    Ballot.findOne({}, function(err, ballot) {
-      res.render("delegate",{ballot});
-    });
+      res.render("delegate");
   }
   else{
     console.log("Logic error, account has no role.");
     res.redirect("/login");
+  }
+});
+
+app.get("/ballot", isLoggedIn, auth, function(req, res){
+  if (req.user.role == "voter" || req.user.role == "delegate"){
+    Ballot.findOne({}, function(err, ballot) {
+      res.send(ballot);
+    });
+  }else{
+    res.status(401).send();
   }
 });
 
@@ -206,10 +210,6 @@ app.post("/eventTest", function(req, res) {
   Promise.resolve(promise).then(() => {
     res.send();
   });
-});
-
-app.get("/vote", isLoggedIn, ensureTotp, function(req, res) {
-  res.render("vote", {user: req.user});
 });
 
 app.post("/editBallot", isLoggedIn, auth, function(req, res) {

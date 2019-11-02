@@ -76,10 +76,10 @@ var users = [
 
 //the default roles
 var roles = [
-  {name: "voter", permissions: ["vote"]},
+  {name: "voter", permissions: ["ballot"]},
   {name: "hasVoted", permissions: []},
   {name: "admin", permissions: ["createDelegate", "audit"]},
-  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot"]}
+  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot", "ballot"]}
 ];
 
 function createUser(details) {

@@ -18,27 +18,22 @@
 				<div class="text-center m-auto">
 				</div>
 				<div class="col text-right m-auto">
-					<a class="btn btn-dark" href="/logout">Log out</a>
+					<a class="btn btn-light" href="/logout">Log out</a>
 				</div>
 			</div>
 			<div id="content" class="row">
-				<% if(ballot){ %>
-					<div class="row m-auto">
-						<h1><%= ballot.electorate %></h1>
-					</div>
-					<div id="aboveLine" class="row m-auto">
-						<% ballot.above.forEach(function(party){ %>
-							<div>party</div>
-						<% }); %>
-					</div>
-					<div id="belowLine" class="row m-auto">
-						
-					</div>
-				<% }else{ %>
-					<div class="bg-danger">
-						Couldn't retrieve ballot!
-					</div>
-				<% } %>
+				<div class="row w-100 text-center justify-content-center mb-2">
+					<h1 id="electorateName"></h1>
+				</div>
+				<div class="w-100"></div>
+				<div id="aboveLine" class="row mb-2">
+				</div>
+				<div class="w-100 mb-2" style="height: 2px; background-color: black;"></div>
+				<div id="belowLine" class="row mb-3	">
+				</div>
+				<div class="row">
+					<button id="submitBtn" class="btn btn-primary">Submit Vote</button>
+				</div>
 			</div>
 			<div id="footer" class="row">
 			</div>
