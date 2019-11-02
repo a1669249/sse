@@ -175,15 +175,15 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
     });
     //Temp User Pass
   }
-  if (req.user.role == "hasVoted"){
+  else if (req.user.role == "hasVoted"){
     res.render("hasVoted");
   }
-  if (req.user.role == "delegate"){
+  else if (req.user.role == "delegate"){
     Ballot.findOne({}, function(err, ballot) {
       res.render("delegate",{ballot});
     });
   }
-  if (req.user.role == null){
+  else{
     console.log("Logic error, account has no role.");
     res.redirect("/login");
   }

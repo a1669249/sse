@@ -22,13 +22,27 @@
 				</div>
 			</div>
 			<div id="content" class="row">
-				<div class="row m-auto">
-					<h1>Vote</h1>
-					<%= ballot %>
-				</div>
+				<% if(ballot){ %>
+					<div class="row m-auto">
+						<h1><%= ballot.electorate %></h1>
+					</div>
+					<div id="aboveLine" class="row m-auto">
+						<% ballot.above.forEach(function(party){ %>
+							<div>party</div>
+						<% }); %>
+					</div>
+					<div id="belowLine" class="row m-auto">
+						
+					</div>
+				<% }else{ %>
+					<div class="bg-danger">
+						Couldn't retrieve ballot!
+					</div>
+				<% } %>
 			</div>
 			<div id="footer" class="row">
 			</div>
 		</div>
 	</body>
+	<script src='/javascript/vote.js'></script>
 </html>
