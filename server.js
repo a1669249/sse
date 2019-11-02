@@ -90,13 +90,15 @@ passport.deserializeUser(function(id, cb) {
 // if the user is a voter, then their name is not recorded
 // it is recorded if they are a delegate or admin, for accountability purposes
 // this function can be placed within any action to record an event
-function saveEvent({user, action}) {
+function saveEvent({user, action, from, to}) {
   return new Promise(function(resolve, reject) {
     let event = new Event({
       timestamp: new Date(),
       action,
       user:
-        user.role === "voter" ? user.role : `${user.username} (${user.role})`
+        user.role === "voter" ? user.role : `${user.username} (${user.role})`,
+      from,
+      to
     });
     event.save(function(err) {
       if (err) {
@@ -166,7 +168,6 @@ function ensureTotp(req, res, next) {
 
 // Define routes.
 app.get("/", isLoggedIn, ensureTotp, function(req, res) {
-
   switch (req.user.role) {
     case "voter":
       res.render("vote", {user: req.user});
@@ -183,23 +184,6 @@ app.get("/", isLoggedIn, ensureTotp, function(req, res) {
       console.log("Logic error, account has no role.");
       res.redirect("/login");
   }
-
-  // if (req.user.role == "voter"){
-  //   res.render("vote", {user: req.user});
-  //   //Temp User Pass
-  // }
-  // if (req.user.role == "hasVoted"){
-  //   res.render("hasVoted");
-  // }
-  // if (req.user.role == "delegate"){
-  //   Ballot.findOne({}, function(err, ballot) {
-  //     res.render("delegate",{ballot});
-  //   });
-  // }
-  // if (req.user.role == null){
-  //   console.log("Logic error, account has no role.");
-  //   res.redirect("/login");
-  // }
 });
 
 // retrieves every action performed since events began being recorded, and exports them
@@ -208,16 +192,6 @@ app.post("/audit", isLoggedIn, auth, function(req, res) {
   saveEvent({user: req.user, action: "Auditing"});
   Event.find({}, function(err, events) {
     return res.render("audit", {events});
-  });
-});
-
-app.post("/eventTest", function(req, res) {
-  let promise = saveEvent({
-    user: {username: "TestName", role: "delegate"},
-    action: "vote"
-  });
-  Promise.resolve(promise).then(() => {
-    res.send();
   });
 });
 
@@ -232,8 +206,19 @@ app.post("/editBallot", isLoggedIn, auth, function(req, res) {
 });
 
 app.post("/saveBallot", isLoggedIn, auth, function(req, res) {
-  Ballot.findOne({}, function(err, ballot) {
-    res.render("editBallot", {ballot});
+  Ballot.findOne({_id: req.ballot._id}, function(err, oldBallot) {
+    saveEvent({
+      user: req.user,
+      action: "Saving Ballot",
+      from: oldBallot,
+      to: req.ballot
+    });
+    Ballot.updateOne({_id: req.ballot._id}, req.ballot, function(
+      err,
+      newBallot
+    ) {
+      res.redirect("/");
+    });
   });
 });
 
