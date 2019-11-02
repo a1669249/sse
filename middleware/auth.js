@@ -23,7 +23,8 @@ module.exports = {
     // this function can be placed before any action to determine whether it should be completed
     auth: function(req, res, next) {
         Role.findOne({name: req.user.role}, function(err, role) {
-            if (role.permissions.includes(req.originalUrl.split("/")[1])) {
+            let split = req.originalUrl.split("/");
+            if (role.permissions.includes(split[split.length-1])) {
                 next();
             } else res.sendStatus(401);
         });

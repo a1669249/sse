@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const strings = require("../../../views/strings.json");
 const sprintf = require("sprintf");
 const User = require("../../../models/users");
+const base32 = require("thirty-two");
 
 ApiAccountRouter.route("/")
 ///
@@ -45,7 +46,7 @@ ApiAccountRouter.route("/2fa")
                 if (err) {
                     console.log("Something went wrong when updating data.");
                 }
-                res.session.secondFactor = "totp";
+                req.session.secondFactor = "totp";
                 res.redirect("/api/account/2fa");
                 }
             );
