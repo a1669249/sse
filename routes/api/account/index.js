@@ -3,6 +3,7 @@ const auth = require("../../../middleware/auth");
 const crypto = require("crypto");
 const strings = require("../../../views/strings.json");
 const sprintf = require("sprintf");
+const User = require("../../../models/users");
 
 ApiAccountRouter.route("/")
 ///

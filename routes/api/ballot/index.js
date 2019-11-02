@@ -1,5 +1,6 @@
 const auth = require("../../../middleware/auth");
 const audit = require("../../../middleware/audit");
+const Ballot = require("../../../models/ballots");
 const ApiBallotRouter = require("express").Router();
 
 ApiBallotRouter.route("/")

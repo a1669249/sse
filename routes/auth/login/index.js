@@ -1,5 +1,5 @@
 const AuthLoginRouter = require("express").Router();
-const passport = require("../../../middleware/passport");
+const passport = require("../../../middleware/passport").passport;
 const auth = require("../../../middleware/auth");
 var strings = require("../../../views/strings.json");
 

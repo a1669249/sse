@@ -7,10 +7,10 @@ module.exports = function(app) {
   app.get("/", auth.isLoggedIn, auth.ensureTotp, function(req, res) {
     switch (req.user.role) {
       case "voter":
-        res.render("vote", {user: req.user});
+        res.redirect("/api/vote");
         break;
       case "hasVoted":
-        res.render("hasVoted");
+        res.redirect("hasVoted");
         break;
       case "delegate":
         Ballot.findOne({}, function(err, ballot) {
