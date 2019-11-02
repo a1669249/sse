@@ -198,14 +198,14 @@ app.get("/ballot", isLoggedIn, auth, function(req, res){
 
 // retrieves every action performed since events began being recorded, and exports them
 // granted the requester has the relevant permissions
-app.post("/audit", isLoggedIn, auth, function(req, res) {
+app.get("/audit", isLoggedIn, auth, function(req, res) {
   saveEvent({user: req.user, action: "Auditing"});
   Event.find({}, function(err, events) {
     return res.render("audit", {events});
   });
 });
 
-app.post("/editBallot", isLoggedIn, auth, function(req, res) {
+app.get("/editBallot", isLoggedIn, auth, function(req, res) {
   Ballot.findOne({}, function(err, ballot) {
     res.render("editBallot", {ballot});
   });
