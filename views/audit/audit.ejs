@@ -47,10 +47,10 @@
 									</div>
 									<% if(event.from){ %>
 										<div>
-											From: <%= event.from %>
+											From: <%= JSON.stringify(event.from) %>
 										</div>
 										<div>
-											To: <%= event.to %>
+											To: <%= JSON.stringify(event.to) %>
 										</div>
 									<% } %>
 								</li>
