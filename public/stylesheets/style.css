@@ -8,8 +8,8 @@
 	border-color: purple;
 }
 
-ul {
-	max-height: 20%;
+.list-group {
+	max-height: 60vh;
 	overflow-y: auto;
 	/* Again, this is where the magic happens*/
 	-webkit-overflow-scrolling: touch;
@@ -19,16 +19,17 @@ ul {
 
 .list-group-item {
 	border-left: none;
+	border-right: none;
 }
 
 .list-group-item:first-child {
 	border-top: none;
 }
 
-li:last-child {
+.list-group-item:last-child {
 	border-bottom: none;
 }
 
-li:nth-child(even) {
+.log-list:nth-child(even) {
 	background: #f8f8f8;
 }
