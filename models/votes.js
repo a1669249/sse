@@ -15,8 +15,7 @@ var mongoose = require("mongoose"),
   Schema = mongoose.Schema;
 
 var voteSchema = new Schema({
-  above: {type: [String], required: true},
-  below: {type: [String], required: true},
+  encrypted: {type: String, required: true}
 });
 
 module.exports = mongoose.model("Vote", voteSchema);
