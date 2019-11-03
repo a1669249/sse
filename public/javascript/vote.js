@@ -18,7 +18,7 @@ function pageSetup(ballot){
 	ballot.above.forEach(function(party){
 		let baseCol = document.createElement('div');
 		baseCol.classList.add('col');
-		
+
 		let inputCol = document.createElement('div');
 		inputCol.classList.add('col-4','mb-1');
 		baseCol.appendChild(inputCol);
@@ -49,7 +49,7 @@ function pageSetup(ballot){
 		// Column for whole party
 		let baseCol = document.createElement('div');
 		baseCol.classList.add('col');
-		
+
 		// Sub-column for party name
 		let partyNameCol = document.createElement('div');
 		partyNameCol.classList.add('col','mb-1');
@@ -112,6 +112,9 @@ function submitVote(){
 		});
 
 		// Send vote to server
-		$.post('/api/vote',vote);
+		$.post('/api/vote',vote).done(function(data) {
+			console.log("after post");
+			document.location = data.redirect;
+		});
 	}
 }
