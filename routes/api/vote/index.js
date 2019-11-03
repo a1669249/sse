@@ -65,8 +65,8 @@ ApiVoteRouter.route("/")
 			}
 		});
 
-		//Uncomment
-		// req.user.role = "hasVoted";
+		req.user.role = "hasVoted";
+
 		User.updateOne(
 			{_id: req.user._id},
 			req.user,
