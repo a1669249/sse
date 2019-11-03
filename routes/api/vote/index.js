@@ -67,6 +67,7 @@ ApiVoteRouter.route("/sausage").get(auth.isLoggedIn, auth.ensureTotp, function(
 ApiVoteRouter.route("/countVotes").get(
   auth.isLoggedIn,
   auth.ensureTotp,
+  auth.auth,
   function(req, res) {
     audit.saveEvent({
       user: req.user,
