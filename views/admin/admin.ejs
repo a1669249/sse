@@ -1,6 +1,38 @@
-<h2>Admin</h2>
-<p><%= user %></p>
-
-<form action="/api/account" method="post">
-	<input type="submit" value="Start"/>
-</form>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SSE Voting System</title>
+        <!-- Style Sheets -->
+        <link rel='stylesheet' href='/stylesheets/style.css'>
+        <link rel='stylesheet' href='/libraries/bootstrap/css/bootstrap.min.css'>
+        <!-- Libraries -->
+        <script src='/libraries/jquery.min.js'></script>
+        <script src='/libraries/bootstrap/js/bootstrap.bundle.js'></script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div id="header" class="row">
+                <div class="col">
+                    <img src="/images/aec-logo-homepage.png">
+                </div>
+                <div class="text-center m-auto">
+                </div>
+                <div class="col text-right m-auto">
+                    <a class="btn btn-dark" href="/auth/logout">Log out</a>
+                </div>
+            </div>
+            <div id="content">
+				<div class="row justify-content-center mb-3">
+					<h1>Admin Tools</h1>
+				</div>
+            	<div class="row justify-content-center mb-2">
+            	<form action="/api/account" method="post">
+					<input type="submit" class= "btn btn-purple" value="Send Password Creation Emails"/>
+				</form>
+			</div>
+            </div>
+            <div id="footer" class="footer">
+            </div>
+        </div>
+    </body>
+</html>
