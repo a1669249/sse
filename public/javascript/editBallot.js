@@ -1,11 +1,11 @@
-var electorate;
+var savedBallot;
 var partyList = document.getElementById('partyList');
 var candidateLists = document.getElementById('candidateLists');
 var partyCount = 0; // Keeps count of parties so UI ID's don't conflict
 var inputs = new Map();
 
 $.get('/api/ballot', function(ballot){
-	electorate = ballot.electorate;
+	savedBallot = ballot;
 	pageSetup(ballot);
 });
 
@@ -139,6 +139,8 @@ function removePartyFromBallot(e){
 	let tooltipId = e.target.parentNode.getAttribute('aria-describedby');
 	let tooltip = document.getElementById(tooltipId);
 
+	inputs.delete(cansId+'-list');
+
 	tooltip.remove();
 	cans.remove();
 	party.remove();
@@ -213,6 +215,9 @@ function removeCandidate(e){
 	let tooltipId = e.target.parentNode.getAttribute('aria-describedby');
 	let tooltip = document.getElementById(tooltipId);
 
+	let input = inputs.get(can.parentNode.id+'-list');
+	input.candidates = input.candidates.filter(inp => inp != can.firstChild);
+
 	tooltip.remove();
 	can.remove();
 }
@@ -257,13 +262,10 @@ function addCandidate(e){
 
 function saveBallot(){
 	if (
-	confirm("Are you sure you want to save your ballot?\n Click 'OK' to submit or 'Cancel' to revise.")
+		confirm("Are you sure you want to save your ballot?\n Click 'OK' to submit or 'Cancel' to revise.")
 	){
-		var ballot = {
-			electorate: electorate,
-			above: new Array(),
-			below: new Array()
-		};
+		savedBallot.above = [];
+		savedBallot.below = [];
 
 		inputs.forEach(function(inputs, key, map){
 			var pName = inputs.partyName.value;
@@ -271,15 +273,11 @@ function saveBallot(){
 			for (var i = 0; i < inputs.candidates.length; i++){
 				canNames.push(inputs.candidates[i].value);
 			}
-			ballot.above.push(pName);
-			ballot.below.push({party:pName, candidates:canNames});
+			savedBallot.above.push(pName);
+			savedBallot.below.push({party:pName, candidates:canNames});
 		});
 
-		console.log(ballot.electorate);
-		console.log(ballot.above);
-		console.log(ballot.below);
-
 		// Send vote to server
-		// $.post('/api/ballot',ballot);
+		$.post('/api/ballot',savedBallot);
 	}
 }
