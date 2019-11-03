@@ -7,7 +7,6 @@ var passport = require("passport");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
-console.log(process.env.DATABASE_URL);
 var mongoDB = process.env.DATABASE_URL;
 mongoose.connect(
   mongoDB,
