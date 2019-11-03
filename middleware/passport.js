@@ -2,6 +2,9 @@ const LocalStrategy = require("passport-local").Strategy;
 const TotpStrategy = require("passport-totp").Strategy;
 const base32 = require("thirty-two");
 const User = require("../models/users");
+const crypto = require('crypto');
+const hash = crypto.createHash('sha256');
+
 let passport;
 module.exports = {
 
@@ -42,6 +45,8 @@ module.exports = {
                 console.log("Using local strategy");
                 User.findOne({username: username}, function(err, user) {
                     console.log("HERE");
+                    const hashed = hash.update(password)
+                    console.log('HASHED', hashed)
                     if (err) {
                         return cb(err);
                     }
