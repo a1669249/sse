@@ -10,33 +10,32 @@ const nodemailer		= require('nodemailer');
 ApiAccountRouter.route("/")
 	.post(auth.isLoggedIn, auth.auth, function(req, res) {
 		User.find({'role': 'voter'}, (err, doc) => {
-
-		var smtpTransport = nodemailer.createTransport({
-			service: "Gmail",
-			auth: {
-			user: process.env.GMAIL_USER,
-			pass: process.env.GMAIL_PASS
-			}
-		});
-
-		var text = 'Follow this link to create your password: http://localhost:3000/api/account/password?id=';
-
-		var mailOptions = {
-			from: process.env.GMAIL_USER,
-			subject: 'Create your password to vote',
-		};
-
-		for (user of doc) {
-			mailOptions.to = user.email;
-			mailOptions.text = text + user.passwordID;
-
-			smtpTransport.sendMail(mailOptions, (error, info) => {
-				console.log(info);
-				console.log('Message sent: %s', info.messageId);
+			var smtpTransport = nodemailer.createTransport({
+				service: "Gmail",
+				auth: {
+				user: process.env.GMAIL_USER,
+				pass: process.env.GMAIL_PASS
+				}
 			});
-		}
 
-		res.redirect("/");
+			var text = 'Follow this link to create your password: http://localhost:3000/api/account/password?id=';
+
+			var mailOptions = {
+				from: process.env.GMAIL_USER,
+				subject: 'Create your password to vote',
+			};
+
+			for (user of doc) {
+				mailOptions.to = user.email;
+				mailOptions.text = text + user.passwordID;
+
+				smtpTransport.sendMail(mailOptions, (error, info) => {
+					console.log(info);
+					console.log('Message sent: %s', info.messageId);
+				});
+			}
+
+			res.redirect("/");
 		});
 	});
 
@@ -47,9 +46,6 @@ ApiAccountRouter.route("/password")
 		}
 
 		User.find({'passwordID': req.query.id}, (err, doc) => {
-
-			console.log(doc);
-
 			if (err || doc.length != 1) {
 				return res.redirect("/api/error");
 			}
@@ -64,7 +60,7 @@ ApiAccountRouter.route("/password")
 	.post(auth.isNotLoggedIn, function(req, res) {
 		if (req.query.id == null || req.body.password1 == null || req.body.password1 == null
 			|| req.query.password1 != req.query.password2) {
-			return res.redirect("/api/error");
+			return res.redirect("/api/account/password");
 		}
 
 		const query = {'passwordID': req.query.id, 'active': false};
