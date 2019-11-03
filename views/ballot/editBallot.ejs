@@ -1,4 +1,54 @@
-<p>
-  Ballot:
-  <%= ballot %><br />
-</p>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SSE Voting System</title>
+		<!-- Style Sheets -->
+		<link rel='stylesheet' href='/libraries/bootstrap/css/bootstrap.min.css'>
+		<link rel='stylesheet' href='/stylesheets/style.css'>
+		<!-- Libraries -->
+		<script src='/libraries/jquery.min.js'></script>
+		<script src='/libraries/bootstrap/js/bootstrap.bundle.js'></script>
+	</head>
+	<body style="overflow-y: hidden;">
+		<div class="container-fluid">
+			<div id="header" class="row mb-4">
+				<div class="col">
+					<img src="/images/aec-logo-homepage.png">
+				</div>
+				<div class="text-center m-auto">
+				</div>
+				<div class="col text-right m-auto">
+					<a class="btn btn-light" href="/logout">Log Out</a>
+				</div>
+			</div>
+			<div id="content">
+				<div class="row mb-3">
+					<div class="col">
+						<a href="/" class="btn btn-purple ">&larr;Back</a>
+					</div>
+					<div class="col text-center">
+						<h1>Edit Ballot</h1>
+					</div>
+					<div class="col"></div>
+				</div>
+				<div class="row mb-4">
+					<div class="col text-center" style="padding-left: 30rem; padding-right: 30px;">
+						<h3>Parties</h3>
+						<div id="partyList" class="list-group mx-auto" role="tablist"></div>
+					</div>
+					<div class="col text-center" style="padding-right: 30rem; padding-left: 30px;">
+						<h3>Candidates</h3>
+						<div id="candidateLists" class="tab-content"></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col text-center">
+						<button id="saveBtn" class="btn btn-purple">Save Ballot</button>
+					</div>
+				</div>
+			</div>
+			<div id="footer" class="row"></div>
+		</div>
+	</body>
+	<script src='/javascript/editBallot.js'></script>
+</html>

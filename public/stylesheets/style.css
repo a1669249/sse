@@ -1,3 +1,36 @@
 #header {
 	background-color: purple;
 }
+
+.btn-purple {
+	color: #fff;
+	background-color: purple;
+	border-color: purple;
+}
+
+.list-group {
+	max-height: 60vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	/* Again, this is where the magic happens*/
+	-webkit-overflow-scrolling: touch;
+	border-radius: .25rem;
+	border: 1px solid rgba(0,0,0,.125);
+}
+
+.list-group-item {
+	border-left: none;
+	border-right: none;
+}
+
+.list-group-item:first-child {
+	border-top: none;
+}
+
+.list-group-item:last-child {
+	border-bottom: none;
+}
+
+.log-list:nth-child(even) {
+	background: #f8f8f8;
+}
