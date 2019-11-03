@@ -26,7 +26,7 @@ module.exports = {
       let split = req.originalUrl.split("/");
       if (role.permissions.includes(split[split.length - 1])) {
         next();
-      } else res.redirect("/auth/login");
+      } else return res.render("unauthorised");
     });
   }
 };
