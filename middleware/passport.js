@@ -16,7 +16,6 @@ module.exports = {
         // typical implementation of this is as simple as supplying the user ID when
         // serializing, and querying the user record by ID from the database when
         // deserializing.
-        // passport.authenticate = function(req, res, next) { return function(){console.log("AUTH")}; }
 
         this.passport.serializeUser(function(user, cb) {
             cb(null, user.id);

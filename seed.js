@@ -27,7 +27,10 @@ var ballots = [
     below: [
       {party: "Hemp Party", candidates: ["Michael Dab", "Michelle Doob"]},
       {party: "Rain Party", candidates: ["Chief Tomahawk", "Chris Lake"]},
-      {party: "Other Hemp Party", candidates: ["Gregg Teeheytchsee", "Kate Trees"]}
+      {
+        party: "Other Hemp Party",
+        candidates: ["Gregg Teeheytchsee", "Kate Trees"]
+      }
     ]
   }
 ];
@@ -82,7 +85,10 @@ var roles = [
   {name: "voter", permissions: ["ballot"]},
   {name: "hasVoted", permissions: []},
   {name: "admin", permissions: ["createDelegate", "audit"]},
-  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot", "ballot"]}
+  {
+    name: "delegate",
+    permissions: ["audit", "editBallot", "ballot", "countVotes"]
+  }
 ];
 
 function createUser(details) {

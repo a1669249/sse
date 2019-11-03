@@ -10,12 +10,10 @@ module.exports = function(app) {
         res.redirect("/api/vote");
         break;
       case "hasVoted":
-        res.redirect("hasVoted");
+        res.redirect("/api/vote/sausage");
         break;
       case "delegate":
-        Ballot.findOne({}, function(err, ballot) {
-          res.render("delegate",{ballot});
-        });
+        res.render("delegate");
         break;
       default:
         console.log("Logic error, account has no role.");
