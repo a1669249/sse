@@ -1,14 +1,12 @@
 const AuthLoginRouter = require("express").Router();
 const passport = require("../../../middleware/passport").passport;
 const auth = require("../../../middleware/auth");
-var strings = require("../../../views/strings.json");
 
 
 AuthLoginRouter.route("/")
     .get(function(req, res) {
         req.logout();
         res.render("login", {
-            strings: strings
         });
     })
     .post(passport.authenticate("local", {failureRedirect: "/auth/login"}),
@@ -18,8 +16,7 @@ AuthLoginRouter.route("/")
                 res.redirect("/auth/login/2fa");
             } else {
                 req.session.method = "plain";
-                //CHANGE TO TOTP-SETUP BEFORE RELEASE
-                res.redirect("/");
+                res.redirect("/api/account/2fa");
             }
         }
     );
@@ -32,7 +29,6 @@ AuthLoginRouter.route("/2fa")
         }
 
         res.render("totp-input", {
-            strings: strings
         });
     })
     .post(
