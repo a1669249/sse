@@ -4,6 +4,8 @@ var mongoose = require("mongoose");
 var User = require("./models/users");
 var Role = require("./models/roles");
 var Ballot = require("./models/ballots");
+const crypto = require('crypto');
+// const hash = crypto.createHash('sha256');
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
@@ -31,12 +33,28 @@ var ballots = [
 		]
 	}
 ];
+const h1 = crypto.createHash('sha256');
+const h2 = crypto.createHash('sha256');
+const h3 = crypto.createHash('sha256');
+const h4 = crypto.createHash('sha256');
+const h5 = crypto.createHash('sha256');
+const h6 = crypto.createHash('sha256');
+const h7 = crypto.createHash('sha256');
+const h8 = crypto.createHash('sha256');
 
+h1.update("password")
+h2.update("birthday")
+h3.update("bobby300")
+h4.update("qwertyuiop")
+h5.update("secret")
+h6.update("admin")
+h7.update("sd768fg5ds87f6g5ds76fg")
+h8.update("hashtest")
 var users = [
 	{
 		// _id: mongoose.Types.ObjectId("1"),
 		username: "jack",
-		password: "secret",
+		password: h1.digest('hex'),
 		displayName: "Jack",
 		key: null,
 		role: "voter",
@@ -47,7 +65,7 @@ var users = [
 	{
 		// _id: mongoose.Types.ObjectId("2"),
 		username: "jill",
-		password: "birthday",
+		password: h2.digest('hex'),
 		displayName: "Jill",
 		key: null,
 		role: "hasVoted",
@@ -58,7 +76,7 @@ var users = [
 	{
 		// _id: mongoose.Types.ObjectId("3"),
 		username: "bob",
-		password: "bobby300",
+		password: h3.digest('hex'),
 		displayName: "Bob",
 		key: null,
 		role: "voter",
@@ -69,7 +87,7 @@ var users = [
 	{
 		// _id: mongoose.Types.ObjectId("4"),
 		username: "toucanboy",
-		password: "qwertyuiop",
+		password: h4.digest('hex'),
 		displayName: "Larry",
 		key: null,
 		role: "voter",
@@ -79,7 +97,7 @@ var users = [
 	},
 	{
 		username: "delegate",
-		password: "secret",
+		password: h5.digest('hex'),
 		displayName: "Delegate",
 		key: null,
 		role: "delegate",
@@ -89,7 +107,7 @@ var users = [
 	},
 	{
 		username: "admin",
-		password: "admin",
+		password: h6.digest('hex'),
 		displayName: "Admin",
 		key: null,
 		role: "admin",
@@ -99,14 +117,24 @@ var users = [
 	},
 	{
 		username: "test",
-		password: "sd768fg5ds87f6g5ds76fg",
+		password: h7.digest('hex'),
 		displayName: "TESTER",
 		key: null,
 		role: "voter",
 		passwordID: "fd6gd78fgs7g",
 		active: false,
 		email: "a1621426@student.adelaide.edu.au",
-	}
+	},
+  {
+    username: "hashtest",
+    password: h8.digest('hex'),
+    displayName: "TESTER",
+    key: null,
+    role: "voter",
+    passwordID: "fd6gd78fgs7g",
+    active: false,
+    email: "a1621426@student.adelaide.edu.au",
+  }
 ];
 
 //the default roles
