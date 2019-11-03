@@ -62,7 +62,8 @@ ApiAccountRouter.route("/password")
 		});
 	})
 	.post(auth.isNotLoggedIn, function(req, res) {
-		if (req.query.id == null || req.body.password1 == null || req.body.password1 == null || req.query.password1 != req.query.password2) {
+		if (req.query.id == null || req.body.password1 == null || req.body.password1 == null
+			|| req.query.password1 != req.query.password2) {
 			return res.redirect("/api/error");
 		}
 
@@ -72,12 +73,8 @@ ApiAccountRouter.route("/password")
 			const hash = crypto.createHash('sha256');
 			hash.update(req.body.password1);
 
-			const hashedPassword = hash.digest('hex');
-
-			console.log(hashedPassword);
-
 			if (count == 1) {
-				User.findOneAndUpdate(query, {'password': hashedPassword, 'active': true}, (err, doc) => {
+				User.findOneAndUpdate(query, {'password': hash.digest('hex'), 'active': true}, (err, doc) => {
 					if (err || Object.keys(doc).length == 0) {
 						return res.redirect("/api/error");
 					}
