@@ -10,21 +10,28 @@ ApiBallotRouter.route("/")
         });
     })
     .post(auth.isLoggedIn, auth.auth, function(req, res) {
-        Ballot.findOne({_id: req.ballot._id}, function(err, oldBallot) {
+        Ballot.findOne({_id: req.body._id}, function(err, oldBallot) {
             audit.saveEvent({
                 user: req.user,
                 action: "Saving Ballot",
                 from: oldBallot,
-                to: req.ballot
+                to: req.body
             });
             Ballot.updateOne(
-                {_id: req.ballot._id},
-                req.ballot,
+                {_id: req.body._id},
+                req.body,
                 function(err, newBallot) {
                     res.redirect("/");
                 }
             );
         });
     });
+
+ApiBallotRouter.route("/editBallot")
+    .get(auth.isLoggedIn, auth.auth, function(req, res) {
+        Ballot.findOne({}, function(err, ballot) {
+            res.render("editBallot", {ballot});
+        });
+    })
 
 module.exports = ApiBallotRouter;
