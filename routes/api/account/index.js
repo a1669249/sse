@@ -1,3 +1,4 @@
+const dotenv 			= require('dotenv').config();
 const ApiAccountRouter	= require("express").Router();
 const auth				= require("../../../middleware/auth");
 const crypto			= require("crypto");
@@ -13,15 +14,15 @@ ApiAccountRouter.route("/")
 		var smtpTransport = nodemailer.createTransport({
 			service: "Gmail",
 			auth: {
-			user: "securesofteng2019@gmail.com",
-			pass: "asuidtylqi237"
+			user: process.env.GMAIL_USER,
+			pass: process.env.GMAIL_PASS
 			}
 		});
 
 		var text = 'Follow this link to create your password: http://localhost:3000/api/account/password?id=';
 
 		var mailOptions = {
-			from: "securesofteng2019@gmail.com",
+			from: process.env.GMAIL_USER,
 			subject: 'Create your password to vote',
 		};
 

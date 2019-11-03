@@ -1,3 +1,4 @@
+const dotenv =require('dotenv').config();
 var express = require("express");
 var session = require("express-session");
 var mongoose = require("mongoose");
@@ -6,8 +7,8 @@ var passport = require("passport");
 
 //Set up default mongoose connection
 //Format = mongodb+srv://<MongoDBUser>:<UserPassword>@<ClusterName>-cosb2.mongodb.net/test?retryWrites=true&w=majority
-var mongoDB =
-  "mongodb+srv://sseproject:sseproject@sseproject-cosb2.mongodb.net/myvote?retryWrites=true&w=majority";
+console.log(process.env.DATABASE_URL);
+var mongoDB = process.env.DATABASE_URL;
 mongoose.connect(
   mongoDB,
   {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true}
@@ -40,7 +41,7 @@ app.set("view engine", "ejs");
 app.use(require("morgan")("combined"));
 app.use(require("body-parser").urlencoded({extended: true}));
 app.use(session({
-    secret: "keyboard cat",
+    secret: process.env.SECRET_KEY,
     resave: false,
     saveUninitialized: false
 }));
