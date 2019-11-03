@@ -31,9 +31,9 @@ module.exports = {
 	auth: function(req, res, next) {
 		Role.findOne({name: req.user.role}, function(err, role) {
 			let split = req.originalUrl.split("/");
-			if (role.permissions.includes(split[split.length-1])) {
+				if (role.permissions.includes(split[split.length - 1])) {
 				next();
-			} else res.sendStatus(401);
+			} else return res.render("unauthorised");
 		});
 	}
 }
