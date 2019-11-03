@@ -1,4 +1,5 @@
 const auth = require("../../../middleware/auth");
+const audit = require("../../../middleware/audit");
 const ApiVoteRouter = require("express").Router();
 const Ballot = require("../../../models/ballots");
 const Vote = require("../../../models/votes");
@@ -69,5 +70,26 @@ ApiVoteRouter.route("/sausage")
 	.get(auth.isLoggedIn, auth.ensureTotp, function(req, res) {
 		return res.render("hasVoted");
 	});
+
+ApiVoteRouter.route("/countVotes")
+	.get(auth.isLoggedIn, auth.ensureTotp, auth.auth, function(req, res) {
+		audit.saveEvent({
+			user: req.user,
+			action: "Requesting Vote Count"
+		});
+
+		//run algorithm
+		Vote.find({}, function(err, response) {
+			let votes = [];
+			for(encrypted of response) {
+				votes.push(JSON.stringify(crypto.decrypt(encrypted)));
+			}
+			console.log(votes);
+		});
+
+		const results = [];
+		return res.render("results", {results});
+	}
+);
 
 module.exports = ApiVoteRouter;

@@ -1,7 +1,6 @@
 const ApiAccountRouter = require("express").Router();
 const auth = require("../../../middleware/auth");
 const crypto = require("crypto");
-const strings = require("../../../views/strings.json");
 const sprintf = require("sprintf");
 const User = require("../../../models/users");
 const base32 = require("thirty-two");
@@ -26,7 +25,6 @@ ApiAccountRouter.route("/2fa")
                 qrData;
             }
             res.render("totp-setup", {
-            strings: strings,
             user: req.user,
             qrUrl: url
         });
