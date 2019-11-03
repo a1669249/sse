@@ -27,6 +27,7 @@ app.use(express.static('public'));
 
 // Configure view engine to render EJS templates.
 app.set("views", [path.join(__dirname, "views"),
+path.join(__dirname, "views/admin"),
 path.join(__dirname, "views/audit"),
 path.join(__dirname, "views/ballot"),
 path.join(__dirname, "views/delegate"),

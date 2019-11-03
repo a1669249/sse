@@ -9,7 +9,7 @@
 		<script src='/libraries/jquery.min.js'></script>
 		<script src='/libraries/bootstrap/js/bootstrap.bundle.js'></script>
 	</head>
-	<body style="overflow-y: hidden;">
+	<body>
 		<div class="container-fluid">
 			<div id="header" class="row mb-4">
 				<div class="col">
@@ -27,36 +27,12 @@
 						<a href="/" class="btn btn-purple ">&larr;Back</a>
 					</div>
 					<div class="col text-center">
-						<h1>System Audit</h1>
+						<h1>Unauthorised</h1>
 					</div>
 					<div class="col"></div>
 				</div>
-				<div class="row">
-					<div class="col">
-						<ul class="list-group mx-auto" style="width: 40%;">
-							<% events.reverse().forEach(function(event){ %>
-								<li class="list-group-item log-list">
-									<div>
-										Time: <%= event.timestamp %>
-									</div>
-									<div>
-										User: <%= event.user %>
-									</div>
-									<div>
-										Action: <%= event.action %>
-									</div>
-									<% if(event.from){ %>
-										<div>
-											From: <%= JSON.stringify(event.from) %>
-										</div>
-										<div>
-											To: <%= JSON.stringify(event.to) %>
-										</div>
-									<% } %>
-								</li>
-							<% }); %>
-						</div>
-					</div>
+				<div class="row justify-content-center">
+					<h3>You shouldn't be here champ.</h3>
 				</div>
 			</div>
 			<div id="footer" class="row"></div>
