@@ -25,16 +25,15 @@ var ballots = [
     electorate: "Adelaide",
     above: ["Hemp Party", "Rain Party", "Other Hemp Party"],
     below: [
-      {party: "Hemp Party", candidates: ["candidate1", "candidate2"]},
-      {party: "Rain Party", candidates: ["candidate1", "candidate2"]},
-      {party: "Other Hemp Party", candidates: ["candidate1", "candidate2"]}
+      {party: "Hemp Party", candidates: ["Michael Dab", "Michelle Doob"]},
+      {party: "Rain Party", candidates: ["Chief Tomahawk", "Chris Lake"]},
+      {party: "Other Hemp Party", candidates: ["Gregg Teeheytchsee", "Kate Trees"]}
     ]
   }
 ];
 
 var users = [
   {
-    // _id: mongoose.Types.ObjectId("1"),
     username: "jack",
     password: "secret",
     displayName: "Jack",
@@ -42,7 +41,6 @@ var users = [
     role: "voter"
   },
   {
-    // _id: mongoose.Types.ObjectId("2"),
     username: "jill",
     password: "birthday",
     displayName: "Jill",
@@ -50,7 +48,6 @@ var users = [
     role: "hasVoted"
   },
   {
-    // _id: mongoose.Types.ObjectId("3"),
     username: "bob",
     password: "bobby300",
     displayName: "Bob",
@@ -58,7 +55,6 @@ var users = [
     role: "voter"
   },
   {
-    // _id: mongoose.Types.ObjectId("4"),
     username: "toucanboy",
     password: "qwertyuiop",
     displayName: "Larry",
@@ -83,10 +79,10 @@ var users = [
 
 //the default roles
 var roles = [
-  {name: "voter", permissions: ["vote"]},
+  {name: "voter", permissions: ["ballot"]},
   {name: "hasVoted", permissions: []},
   {name: "admin", permissions: ["createDelegate", "audit"]},
-  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot"]}
+  {name: "delegate", permissions: ["audit", "editBallot", "saveBallot", "ballot"]}
 ];
 
 function createUser(details) {

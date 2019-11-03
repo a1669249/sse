@@ -23,6 +23,8 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 var app = express();
 
+app.use(express.static('public'));
+
 // Configure view engine to render EJS templates.
 app.set("views", [path.join(__dirname, "views"),
 path.join(__dirname, "views/audit"),

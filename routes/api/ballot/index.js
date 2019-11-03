@@ -6,7 +6,7 @@ const ApiBallotRouter = require("express").Router();
 ApiBallotRouter.route("/")
     .get(auth.isLoggedIn, auth.auth, function(req, res) {
         Ballot.findOne({}, function(err, ballot) {
-            res.render("editBallot", {ballot});
+            res.send(ballot);
         });
     })
     .post(auth.isLoggedIn, auth.auth, function(req, res) {
