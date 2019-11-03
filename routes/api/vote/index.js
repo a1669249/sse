@@ -11,7 +11,7 @@ ApiVoteRouter.route("/")
 		return res.render("vote");
 	})
 	.post(auth.isLoggedIn, auth.ensureTotp, function(req, res) {
-		const vote = req.body;
+		let vote = req.body;
 		Ballot.findOne({}, function(err, ballot) {
 			let valid = false;
 			if(vote.below) {
@@ -41,7 +41,17 @@ ApiVoteRouter.route("/")
 
 
 			if(valid) {
-				vote = (valid == "below" ? vote.below : vote.above);
+				if(valid == "below") {
+					for(party of ballot.below) {
+						if(party.candidates.includes(vote.below[0])) {
+							vote = party.party;
+							break;
+						}
+					}
+				} else {
+					vote = vote.above[0];
+				}
+				console.log(vote);
 				details = {
 					encrypted: crypto.encrypt(JSON.stringify(vote))
 				}
@@ -91,13 +101,15 @@ ApiVoteRouter.route("/countVotes")
 			const map = new Map();
 			for(vote of votes) {
 				if(map.has(vote)) {
-
+					map.set(vote, map.get(vote) + 1);
+				} else {
+					map.set(vote, 1);
 				}
 			}
+			result = new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
+			const results = result.keys().next().value;
+			return res.render("results", {results});
 		});
-
-		const results = [];
-		return res.render("results", {results});
 	}
 );
 
