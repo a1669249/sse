@@ -1,3 +1,9 @@
+/*
+	Populates the editBallot.ejs UI with the parties and their candidates
+	from the retrieved ballot object. Handles saving the ballot.
+	Input can be seen when accessing /api/ballot/editBallot.
+	No output available.
+*/
 var savedBallot;
 var partyList = document.getElementById('partyList');
 var candidateLists = document.getElementById('candidateLists');
@@ -132,6 +138,9 @@ function pageSetup(ballot){
 	saveBtn.addEventListener('click', saveBallot);
 }
 
+// Called to remove party from the ballot.
+// Gets the party UI elements + all the candidate elements for that party
+// and removes them completely.
 function removePartyFromBallot(e){
 	let party = e.target.parentNode.parentNode;
 	let cansId = party.getAttribute('href').slice(1);
@@ -146,6 +155,9 @@ function removePartyFromBallot(e){
 	party.remove();
 }
 
+// Used to add a new party to the ballot.
+// Same as the page setup code but creates a blank
+// party and candidates list.
 function addPartyToBallot(){
 	let inputTemp = {};
 
@@ -210,6 +222,8 @@ function addPartyToBallot(){
 	$('[data-toggle="tooltip"]').tooltip();
 }
 
+// Removes a candidate from their party.
+// Completely removes the candidate UI element.
 function removeCandidate(e){
 	let can = e.target.parentNode.parentNode;
 	let tooltipId = e.target.parentNode.getAttribute('aria-describedby');
@@ -222,6 +236,9 @@ function removeCandidate(e){
 	can.remove();
 }
 
+// Add a candidate to a party.
+// Similar to the page setup version but
+// for a single blank candidate.
 function addCandidate(e){
 	let tabPane = e.target.parentNode;
 
@@ -260,6 +277,8 @@ function addCandidate(e){
 	$('[data-toggle="tooltip"]').tooltip();
 }
 
+// Uses the party and candidate inputs to update the ballot object
+// and submit to server.
 function saveBallot(){
 	if (
 		confirm("Are you sure you want to save your ballot?\n Click 'OK' to submit or 'Cancel' to revise.")
