@@ -22,7 +22,6 @@ module.exports = {
           return;
         }
         resolve(event);
-        console.log(event);
       });
     });
   }

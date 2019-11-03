@@ -13,19 +13,9 @@ ApiVoteRouter.route("/")
 	.post(auth.isLoggedIn, auth.ensureTotp, function(req, res) {
 		const vote = req.body;
 		Ballot.findOne({}, function(err, ballot) {
-			let valid = true;
-			if(vote.above) {
-				//checking names match
-				if(vote.above.length == 0 && vote.below.length == 0) {
-					valid = false;
-				}
-				for(name of vote.above) {
-					if(!ballot.above.includes(name)) {
-						valid = false;
-					}
-				}
-			}
+			let valid = false;
 			if(vote.below) {
+				valid = "below";
 				let candidatenames = [];
 				for(party of ballot.below) {
 					candidatenames = candidatenames.concat(party.candidates);
@@ -36,8 +26,22 @@ ApiVoteRouter.route("/")
 					}
 				}
 			}
+			if(vote.above && valid == false) {
+				//checking names match
+				valid = "above";
+				if(vote.above.length == 0 && vote.below.length == 0) {
+					valid = false;
+				}
+				for(name of vote.above) {
+					if(!ballot.above.includes(name)) {
+						valid = false;
+					}
+				}
+			}
+
 
 			if(valid) {
+				vote = (valid == "below" ? vote.below : vote.above);
 				details = {
 					encrypted: crypto.encrypt(JSON.stringify(vote))
 				}
@@ -73,18 +77,23 @@ ApiVoteRouter.route("/sausage")
 
 ApiVoteRouter.route("/countVotes")
 	.get(auth.isLoggedIn, auth.ensureTotp, auth.auth, function(req, res) {
+		console.log("In count votes");
 		audit.saveEvent({
 			user: req.user,
 			action: "Requesting Vote Count"
 		});
-
 		//run algorithm
 		Vote.find({}, function(err, response) {
 			let votes = [];
-			for(encrypted of response) {
-				votes.push(JSON.stringify(crypto.decrypt(encrypted)));
+			for(row of response) {
+				votes.push(JSON.parse(crypto.decrypt(row.encrypted)));
 			}
-			console.log(votes);
+			const map = new Map();
+			for(vote of votes) {
+				if(map.has(vote)) {
+
+				}
+			}
 		});
 
 		const results = [];
