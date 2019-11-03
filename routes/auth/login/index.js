@@ -16,8 +16,8 @@ AuthLoginRouter.route("/")
                 res.redirect("/auth/login/2fa");
             } else {
                 req.session.method = "plain";
-                res.redirect("/");
-                // res.redirect("/api/account/2fa");
+                // res.redirect("/");
+                res.redirect("/api/account/2fa");
             }
         }
     );
