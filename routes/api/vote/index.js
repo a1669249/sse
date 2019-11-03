@@ -107,8 +107,18 @@ ApiVoteRouter.route("/countVotes")
 				}
 			}
 			result = new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
-			const results = result.keys().next().value;
-			return res.render("results", {results});
+			Ballot.findOne({}, function(err, ballot) {
+				const partyNames = [];
+				for(party of ballot.below) {
+					partyNames.push(party.party);
+				}
+				let iter = result.keys();
+				let partyName = iter.next().value;
+				while(!partyNames.includes(partyName)) {
+					partyName = iter.next().value;
+				}
+				return res.render("results", {results: partyName});
+			});
 		});
 	}
 );
