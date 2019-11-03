@@ -43,35 +43,43 @@ ApiAccountRouter.route("/")
 ApiAccountRouter.route("/password")
 	.get(auth.isNotLoggedIn, function(req, res) {
 		if (req.query.id == null) {
-		return res.redirect("/error");
+			return res.redirect("/api/error");
 		}
 
 		User.find({'passwordID': req.query.id}, (err, doc) => {
-		if (err || doc.length != 1) {
-			return res.redirect("/error");
-		}
 
-		if (doc[0].active == true) {
-			return res.redirect("/error");
-		}
+			console.log(doc);
 
-		return res.render("password", {id: req.query.id});
+			if (err || doc.length != 1) {
+				return res.redirect("/api/error");
+			}
+
+			if (doc[0].active == true) {
+				return res.redirect("/api/error");
+			}
+
+			return res.render("password", {id: req.query.id});
 		});
 	})
 	.post(auth.isNotLoggedIn, function(req, res) {
 		if (req.query.id == null || req.body.password1 == null || req.body.password1 == null || req.query.password1 != req.query.password2) {
-			return res.redirect("/error");
+			return res.redirect("/api/error");
 		}
 
 		const query = {'passwordID': req.query.id, 'active': false};
 
 		User.count(query, function(err, count) {
-			console.log(count);
+			const hash = crypto.createHash('sha256');
+			hash.update(req.body.password1);
+
+			const hashedPassword = hash.digest('hex');
+
+			console.log(hashedPassword);
 
 			if (count == 1) {
-				User.findOneAndUpdate(query, {'password': req.body.password1, 'active': true}, (err, doc) => {
+				User.findOneAndUpdate(query, {'password': hashedPassword, 'active': true}, (err, doc) => {
 					if (err || Object.keys(doc).length == 0) {
-						return res.redirect("/error");
+						return res.redirect("/api/error");
 					}
 
 					return res.redirect("/");

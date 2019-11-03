@@ -124,17 +124,7 @@ var users = [
 		passwordID: "fd6gd78fgs7g",
 		active: false,
 		email: "a1621426@student.adelaide.edu.au",
-	},
-  {
-    username: "hashtest",
-    password: h8.digest('hex'),
-    displayName: "TESTER",
-    key: null,
-    role: "voter",
-    passwordID: "fd6gd78fgs7g",
-    active: false,
-    email: "a1621426@student.adelaide.edu.au",
-  }
+	}
 ];
 
 //the default roles
